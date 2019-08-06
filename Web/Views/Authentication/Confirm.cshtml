@@ -1,0 +1,19 @@
+﻿@model string
+@{
+    ViewData["Title"] = "Confirm";
+}
+
+<h1>Activation</h1>
+
+@if (!ViewContext.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        <div asp-validation-summary="All"></div>
+    </div>
+}
+else
+{
+    <p>Email is successfuly confirmed</p>
+}
+
+<a asp-controller="Home" asp-action="Index">Home page</a>
