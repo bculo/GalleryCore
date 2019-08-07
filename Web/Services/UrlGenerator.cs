@@ -1,8 +1,4 @@
-﻿using ApplicationCore.Entities;
-using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Linq;
-using System.Text;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
 using Web.Interfaces;
 
@@ -15,45 +11,24 @@ namespace Web.Services
         private string CallbackURL { get; set; }
         private string DestinationRoute { get; set; }
 
-        public virtual string CreateActivationUrl(ControllerBase controller, string userId, string token, string controllerName, string actionName)
+        public virtual string CreateUrl(ControllerBase controller, string userId, string token, string controllerName, string actionName)
         {
             CurrentRoute = GetCurrentRoute(controller);
             DestinationRoute = SetFinalRoute(controllerName, actionName);
 
-            object obj = new
+            object obj = GetObject(userId, token);
+
+            CallbackURL = SetCallbackUrl(controller, obj, DestinationRoute);
+            return Regex.Replace(CallbackURL, CurrentRoute, DestinationRoute);
+        }
+
+        protected virtual object GetObject(string userId, string token)
+        {
+            return new 
             {
                 ident = userId,
                 tok = token
             };
-
-            CallbackURL = SetCallbackUrl(controller, obj, DestinationRoute);
-            return Regex.Replace(CallbackURL, CurrentRoute, DestinationRoute);
-        }
-
-        public virtual string CreatePasswordRecoveryUrl(ControllerBase controller, Uploader user, string controllerName, string actionName)
-        {
-            CurrentRoute = GetCurrentRoute(controller);
-            DestinationRoute = SetFinalRoute(controllerName, actionName);
-
-            byte[] time = BitConverter.GetBytes(DateTime.UtcNow.ToBinary());
-            //byte[] key = Encoding.UTF8.GetBytes(user.HelpId);
-            byte[] key = Encoding.UTF8.GetBytes(string.Empty);
-            string token = Convert.ToBase64String(time.Concat(key).ToArray());
-
-            object obj = new
-            {
-                token = ""
-            };
-
-            CallbackURL = SetCallbackUrl(controller, obj, DestinationRoute);
-            return Regex.Replace(CallbackURL, CurrentRoute, DestinationRoute);
-        }
-
-        protected virtual string GetUserTokenAs64String(Uploader user)
-        {
-            //byte[] key = Encoding.UTF8.GetBytes(user.HelpId);
-            byte[] tokenArray = Encoding.UTF8.GetBytes(string.Empty);
-            return Convert.ToBase64String(tokenArray);
         }
 
         protected virtual string GetCurrentRoute(ControllerBase controller)

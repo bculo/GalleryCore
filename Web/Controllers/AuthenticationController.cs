@@ -42,7 +42,7 @@ namespace Web.Controllers
             {
                 IUploader uploader = serviceResult.Result;
                 string token = await authService.CreateConfirmationTokenAsync(uploader);
-                string url = urlService.CreateActivationUrl(this, uploader.UserId, token, ToString(), nameof(Confirm));
+                string url = urlService.CreateUrl(this, uploader.UserId, token, ToString(), nameof(Confirm));
                 await mailService.SendRegistrationEmailAsync(uploader.UserMail, url, token);
                 return RedirectToAction(nameof(Login));
             }
@@ -84,8 +84,8 @@ namespace Web.Controllers
             if(uploader != null)
             {
                 string token = await authService.CreatePasswordRecoveryTokenAsync(uploader);
-                string url = urlService.CreatePasswordRecoveryUrl(this, uploader.UserId, token, ToString(), nameof(ConfirmPassword));
-                await mailService.SendRegistrationEmailAsync(uploader.UserMail, url, token);
+                string url = urlService.CreateUrl(this, uploader.UserId, token, ToString(), nameof(ConfirmPassword));
+                await mailService.SendRegistrationEmailAsync(uploader.UserMail, url, token); //ADD METHOD
                 return RedirectToAction(nameof(Login));
             }
 
