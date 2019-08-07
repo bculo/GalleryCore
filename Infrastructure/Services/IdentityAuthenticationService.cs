@@ -1,11 +1,10 @@
 ﻿using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
+using ApplicationCore.Services.Helpers.ResultServices;
 using Infrastructure.IdentityData;
 using Microsoft.AspNetCore.Identity;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Infrastructure.Services
@@ -23,6 +22,41 @@ namespace Infrastructure.Services
             this.repository = repository;
         }
 
+        /// <summary>
+        /// Get user by id
+        /// </summary>
+        /// <param name="userId">user id</param>
+        /// <returns>user</returns>
+        public virtual async Task<IUploader> GetUserByIdAsync(string userId)
+        {
+            if (string.IsNullOrEmpty(userId))
+            {
+                throw new ArgumentNullException(nameof(userId));
+            }
+
+            return await userManager.FindByIdAsync(userId);
+        }
+
+        /// <summary>
+        /// Get user by email
+        /// </summary>
+        /// <param name="userId">user email</param>
+        /// <returns>user</returns>
+        public virtual async Task<IUploader> GetUserByMailAsync(string email)
+        {
+            if (string.IsNullOrEmpty(email))
+            {
+                throw new ArgumentNullException(nameof(email));
+            }
+
+            return await userManager.FindByEmailAsync(email);
+        }
+
+        /// <summary>
+        /// Create email confirmation token
+        /// </summary>
+        /// <param name="uploader">user</param>
+        /// <returns>confirmation token</returns>
         public virtual async Task<string> CreateConfirmationTokenAsync(IUploader uploader)
         {
             if (uploader == null)
@@ -33,6 +67,11 @@ namespace Infrastructure.Services
             return await userManager.GenerateEmailConfirmationTokenAsync(uploader as GalleryUser);
         }
 
+        /// <summary>
+        /// Create password recovery token
+        /// </summary>
+        /// <param name="uploader">user</param>
+        /// <returns>password recovery token</returns>
         public virtual async Task<string> CreatePasswordRecoveryTokenAsync(IUploader uploader)
         {
             if (uploader == null)
@@ -43,7 +82,14 @@ namespace Infrastructure.Services
             return await userManager.GeneratePasswordResetTokenAsync(uploader as GalleryUser);
         }
 
-        public virtual async Task<(IUploader, IEnumerable<ErrorMessage>)> RegisterUserAsync(string userName, string email, string password)
+        /// <summary>
+        /// Register user
+        /// </summary>
+        /// <param name="userName">username</param>
+        /// <param name="email">email</param>
+        /// <param name="password">password</param>
+        /// <returns>instance of ServiceResult</returns>
+        public virtual async Task<ServiceResult<IUploader>> RegisterUserAsync(string userName, string email, string password)
         {
             if (string.IsNullOrEmpty(userName))
             {
@@ -65,9 +111,13 @@ namespace Infrastructure.Services
 
             var createResult = await userManager.CreateAsync(galleryUser, password); //Add user to identity database
 
+            var resultFactory = new ResultServiceRequest<IUploader>();
+
             if (!createResult.Succeeded)
             {
-                return (galleryUser, CreateListOfErrors(createResult.Errors));
+                return resultFactory.FailedRequest(createResult.Errors
+                    .Select(item => item.Description)
+                    .ToList());
             }
 
             //uncomment next line if you don't have a trigger in database for adding role to the user
@@ -79,10 +129,10 @@ namespace Infrastructure.Services
             //uncomment roleResult variable if you adding role to the user with method AddToRoleAsync(...) 
             await Task.WhenAll(createGalleryUser/*, roleResult*/);
 
-            return (galleryUser, new List<ErrorMessage>()); //pass empty list if everything allright
+            return resultFactory.SuccessRequest(galleryUser);
         }
 
-        public virtual async Task<IEnumerable<ErrorMessage>> VerifyConfirmationTokenAsync(string id, string token)
+        public virtual async Task<DefaultServiceResult> VerifyConfirmationTokenAsync(string id, string token)
         {
             if (string.IsNullOrEmpty(id))
             {
@@ -96,26 +146,16 @@ namespace Infrastructure.Services
 
             GalleryUser user = await userManager.FindByIdAsync(id);
 
-            if(user == null)
+            var resultFactory = new NoResultServiceRequest();
+
+            if (user == null)
             {
-                return new List<ErrorMessage>
-                {
-                    new ErrorMessage{ Key = "NoUser", Description = "User doesnt exist" }
-                };
+                return resultFactory.FailedRequest("Used doenst exist");
             }
 
             var resutlToken = await userManager.ConfirmEmailAsync(user, token);
 
-            return CreateListOfErrors(resutlToken.Errors);
-        }
-
-        private IEnumerable<ErrorMessage> CreateListOfErrors(IEnumerable<IdentityError> errors)
-        {
-            return errors.Select(item => new ErrorMessage
-            {
-                Key = item.Code,
-                Description = item.Description
-            });
+            return resultFactory.SuccessRequest();
         }
     }
 }

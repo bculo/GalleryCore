@@ -10,8 +10,8 @@ using Web.Services;
 
 namespace Web.Controllers
 {
-    [ValidateUserLogedIn]
     [ErrorFilter]
+    [ValidateUserLogedIn]
     public class AuthenticationController : Controller
     {
         protected readonly IEmailSender mailService;
@@ -36,17 +36,18 @@ namespace Web.Controllers
         [ValidateAntiForgeryToken]
         public virtual async Task<IActionResult> Registration(RegistrationModel model)
         {
-            var (uploader, errorMessages) = await authService.RegisterUserAsync(model.UserName, model.Email, model.Password);
+            var serviceResult = await authService.RegisterUserAsync(model.UserName, model.Email, model.Password);
 
-            if (!errorMessages.ErrorExists())
+            if (serviceResult.Success)
             {
+                IUploader uploader = serviceResult.Result;
                 string token = await authService.CreateConfirmationTokenAsync(uploader);
                 string url = urlService.CreateActivationUrl(this, uploader.UserId, token, ToString(), nameof(Confirm));
                 await mailService.SendRegistrationEmailAsync(uploader.UserMail, url, token);
                 return RedirectToAction(nameof(Login));
             }
 
-            ModelStateErrorPopulator.FillWithErrors(this, errorMessages);
+            ModelStateErrorPopulator.FillWithErrors(this, serviceResult.Errors);
             return View(model);
         }
          
@@ -54,8 +55,8 @@ namespace Web.Controllers
         public virtual IActionResult Login() => View();
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
         [ValidateModel]
+        [ValidateAntiForgeryToken]
         public virtual async Task<IActionResult> Login(LoginModel model)
         {
             ModelState.TryAddModelError("InvalidCredentials", "Invalid credentials.");
@@ -65,10 +66,35 @@ namespace Web.Controllers
         [HttpGet]
         public virtual async Task<IActionResult> Confirm(string ident, string tok)
         {
-            var messages = await authService.VerifyConfirmationTokenAsync(ident, tok);
-            ModelStateErrorPopulator.FillWithErrors(this, messages);
+            var serviceResult = await authService.VerifyConfirmationTokenAsync(ident, tok);
+            ModelStateErrorPopulator.FillWithErrors(this, serviceResult.Errors);
             return View();
         }
+
+        [HttpGet]
+        public virtual IActionResult PasswordRecovery() => View();
+
+        [HttpPost]
+        [ValidateModel]
+        [ValidateAntiForgeryToken]
+        public virtual async Task<IActionResult> PasswordRecovery(PasswordRecoveryModel model)
+        {
+            IUploader uploader = await authService.GetUserByMailAsync(model.Email);
+
+            if(uploader != null)
+            {
+                string token = await authService.CreatePasswordRecoveryTokenAsync(uploader);
+                string url = urlService.CreatePasswordRecoveryUrl(this, uploader.UserId, token, ToString(), nameof(ConfirmPassword));
+                await mailService.SendRegistrationEmailAsync(uploader.UserMail, url, token);
+                return RedirectToAction(nameof(Login));
+            }
+
+            ModelState.TryAddModelError("User", "User doesnt exist");
+            return View();
+        }
+
+        [HttpGet]
+        public virtual IActionResult ConfirmPassword(string ident, string to) => View();
 
         public override string ToString() => nameof(AuthenticationController);
     }
