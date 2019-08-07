@@ -10,22 +10,20 @@ using Web.Services;
 
 namespace Web.Controllers
 {
-    [UserLogedIn]
+    [ValidateUserLogedIn]
+    [ErrorFilter]
     public class AuthenticationController : Controller
     {
-        protected readonly IMapper mapper;
         protected readonly IEmailSender mailService;
         protected readonly IUrlGenerator urlService;
         protected readonly IAuthenticationService authService;
 
         public AuthenticationController(
             IAuthenticationService authService,
-            IMapper mapper,
             IEmailSender mailService,
             IUrlGenerator urlService)
         {
             this.mailService = mailService;
-            this.mapper = mapper;
             this.urlService = urlService;
             this.authService = authService;
         }
@@ -67,13 +65,7 @@ namespace Web.Controllers
         [HttpGet]
         public virtual async Task<IActionResult> Confirm(string ident, string tok)
         {
-            if (string.IsNullOrEmpty(ident) || string.IsNullOrEmpty(tok))
-            {
-                return BadRequest();
-            }
-
             var messages = await authService.VerifyConfirmationTokenAsync(ident, tok);
-
             ModelStateErrorPopulator.FillWithErrors(this, messages);
             return View();
         }

@@ -7,7 +7,7 @@ using System;
 namespace Web.Filters
 {
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
-    public class UserLogedIn : ActionFilterAttribute
+    public class ValidateUserLogedIn : ActionFilterAttribute
     {
         public override void OnActionExecuting(ActionExecutingContext context)
         {
