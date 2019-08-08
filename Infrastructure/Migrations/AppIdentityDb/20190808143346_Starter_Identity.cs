@@ -2,9 +2,9 @@
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace Infrastructure.Migrations.AppIdentity
+namespace Infrastructure.Migrations.AppIdentityDb
 {
-    public partial class InitalGallery : Migration
+    public partial class Starter_Identity : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -156,17 +156,17 @@ namespace Infrastructure.Migrations.AppIdentity
             migrationBuilder.InsertData(
                 table: "AspNetRoles",
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
-                values: new object[] { "33bfe4b7-fea8-40f0-bd2a-5fc34d5745e5", "18c0c737-4581-4de3-a992-49794104b3dd", "User", "USER" });
+                values: new object[] { "1", "34289ae4-cc91-4436-9378-88971cfb2b2c", "User", "USER" });
 
             migrationBuilder.InsertData(
                 table: "AspNetRoles",
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
-                values: new object[] { "7e7e3cb2-fb9f-4f9c-9ff1-4a4dc5c008dd", "f2c5fdf1-2ef5-4f84-9c0f-c2c428e5b49e", "Moderator", "MODERATOR" });
+                values: new object[] { "2", "c729ab8a-bd9b-4934-a493-4dc2ce5dcd5e", "Moderator", "MODERATOR" });
 
             migrationBuilder.InsertData(
                 table: "AspNetRoles",
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
-                values: new object[] { "9b2ce4bd-4f5a-4417-90a4-15217392c675", "cf6e5a52-2dd1-4fd8-99ff-c2d9acc19ac7", "Administrator", "ADMINISTRATOR" });
+                values: new object[] { "3", "0352e2d6-a682-4788-a1dc-0b889a461cd1", "Administrator", "ADMINISTRATOR" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",

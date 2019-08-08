@@ -1,4 +1,5 @@
-﻿using Infrastructure.IdentityData;
+﻿using Infrastructure.Identity;
+using Infrastructure.IdentityData;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -63,7 +64,7 @@ namespace Web.Configuration
         /// <param name="services"></param>
         private static void CreateIdentity(IServiceCollection services)
         {
-            services.AddIdentity<GalleryUser, IdentityRole>()
+            services.AddIdentity<GalleryUser, GalleryRole>()
             .AddEntityFrameworkStores<AppIdentityDbContext>()
             .AddDefaultTokenProviders();
         }

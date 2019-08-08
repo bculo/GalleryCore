@@ -2,11 +2,11 @@
 using System.Security.Claims;
 using System.Security.Principal;
 
-namespace Web.Services.Helpers
+namespace Infrastructure.Helpers.Claim
 {
     public class ClaimsHolder
     {
-        public IEnumerable<Claim> Claims { get; set; }
+        public IEnumerable<System.Security.Claims.Claim> Claims { get; set; }
         public IIdentity ClaimsIdentity { get; set; }
         public ClaimsPrincipal ClaimsPrincipal { get; set; }
     }

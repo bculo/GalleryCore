@@ -30,7 +30,6 @@ namespace Web.Configuration
             services.AddScoped<IAuthenticationService, IdentityAuthenticationService>();
 
             //Web project
-            services.AddScoped<IClaimFactory, ClaimFactory>();
             services.AddScoped<IUrlGenerator, UrlGenerator>();
         }
     }

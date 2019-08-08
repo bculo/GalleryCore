@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Infrastructure.Identity;
+using Infrastructure.IdentityData.Configuration;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.IdentityData
 {
-    public class AppIdentityDbContext : IdentityDbContext<GalleryUser>
+    public class AppIdentityDbContext : IdentityDbContext<GalleryUser, GalleryRole, string>
     {
         public AppIdentityDbContext(DbContextOptions<AppIdentityDbContext> options)
             : base(options) { }
@@ -15,7 +17,7 @@ namespace Infrastructure.IdentityData
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-            builder.ApplyConfigurationsFromAssembly(typeof(AppIdentityDbContext).Assembly);
+            builder.ApplyConfiguration(new RoleConfiguration());
         }
     }
 }

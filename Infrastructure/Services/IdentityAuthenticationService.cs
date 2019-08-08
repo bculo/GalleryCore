@@ -9,10 +9,17 @@ using System.Threading.Tasks;
 
 namespace Infrastructure.Services
 {
+    /// <summary>
+    /// Authentication with UserManager and SignInManager
+    /// </summary>
     public class IdentityAuthenticationService : IAuthenticationService
     {
         protected readonly UserManager<GalleryUser> userManager;
         protected readonly IAsyncRepository<Uploader> repository;
+
+        /// <summary>
+        /// Add Dependency on Microsoft.AspNetCore.Identity.EntityFrameworkCore if working with SignInManager
+        /// </summary>
         protected readonly SignInManager<GalleryUser> signInManager;
 
         public IdentityAuthenticationService(
@@ -138,14 +145,10 @@ namespace Infrastructure.Services
                     .ToList());
             }
 
-            //uncomment next line if you don't have a trigger in database for adding role to the user
-            //var roleResult = userManager.AddToRoleAsync(user, Role.User.Name); //Adding role to the user
-
-            //We can create trigger for this situation to
+            var roleResult = userManager.AddToRoleAsync(galleryUser, Role.User.Name); //Adding role to the user
             var createGalleryUser = repository.AddAsync(uploader); // add user to image gallery database
 
-            //uncomment roleResult variable if you adding role to the user with method AddToRoleAsync(...) 
-            await Task.WhenAll(createGalleryUser/*, roleResult*/);
+            await Task.WhenAll(createGalleryUser, roleResult);
 
             return resultFactory.SuccessRequest(galleryUser);
         }
