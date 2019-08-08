@@ -8,5 +8,6 @@ namespace ApplicationCore.Interfaces
     public interface IEmailSender
     {
         Task SendRegistrationEmailAsync(string mail, string callbackURL, string token);
+        Task SendPasswordRecoveryAsync(string mail, string callbackURL, string token);
     }
 }

@@ -13,13 +13,16 @@ namespace Infrastructure.Services
     {
         protected readonly UserManager<GalleryUser> userManager;
         protected readonly IAsyncRepository<Uploader> repository;
+        protected readonly SignInManager<GalleryUser> signInManager;
 
         public IdentityAuthenticationService(
             UserManager<GalleryUser> userManager,
-            IAsyncRepository<Uploader> repository)
+            IAsyncRepository<Uploader> repository,
+            SignInManager<GalleryUser> signInManager)
         {
             this.userManager = userManager;
             this.repository = repository;
+            this.signInManager = signInManager;
         }
 
         /// <summary>
@@ -50,6 +53,21 @@ namespace Infrastructure.Services
             }
 
             return await userManager.FindByEmailAsync(email);
+        }
+
+        /// <summary>
+        /// Get user by username
+        /// </summary>
+        /// <param name="userId">user username</param>
+        /// <returns>user</returns>
+        public virtual async Task<IUploader> GetUserByUserNameAsync(string userName)
+        {
+            if (string.IsNullOrEmpty(userName))
+            {
+                throw new ArgumentNullException(nameof(userName));
+            }
+
+            return await userManager.FindByNameAsync(userName);
         }
 
         /// <summary>
@@ -132,11 +150,17 @@ namespace Infrastructure.Services
             return resultFactory.SuccessRequest(galleryUser);
         }
 
-        public virtual async Task<DefaultServiceResult> VerifyConfirmationTokenAsync(string id, string token)
+        /// <summary>
+        /// Verify confirmation token
+        /// </summary>
+        /// <param name="userId">user id</param>
+        /// <param name="token">user token</param>
+        /// <returns>instance of DefaultServiceResult</returns>
+        public virtual async Task<DefaultServiceResult> VerifyConfirmationTokenAsync(string userId, string token)
         {
-            if (string.IsNullOrEmpty(id))
+            if (string.IsNullOrEmpty(userId))
             {
-                throw new ArgumentNullException(nameof(id));
+                throw new ArgumentNullException(nameof(userId));
             }
 
             if (string.IsNullOrEmpty(token))
@@ -144,7 +168,7 @@ namespace Infrastructure.Services
                 throw new ArgumentNullException(nameof(token));
             }
 
-            GalleryUser user = await userManager.FindByIdAsync(id);
+            GalleryUser user = await userManager.FindByIdAsync(userId);
 
             var resultFactory = new NoResultServiceRequest();
 
@@ -156,6 +180,104 @@ namespace Infrastructure.Services
             var resutlToken = await userManager.ConfirmEmailAsync(user, token);
 
             return resultFactory.SuccessRequest();
+        }
+
+        /// <summary>
+        /// Verify password recovery token and change user password
+        /// </summary>
+        /// <param name="userId">user id</param>
+        /// <param name="token">user token</param>
+        /// <param name="newPassword">new user password</param>
+        /// <returns>instance of DefaultServiceResult</returns>
+        public virtual async Task<DefaultServiceResult> VerifyPasswordRecoveryTokenAsync(string userIdentification, string token, string newPassword)
+        {
+            if (string.IsNullOrEmpty(userIdentification))
+            {
+                throw new ArgumentNullException(nameof(userIdentification));
+            }
+
+            if (string.IsNullOrEmpty(token))
+            {
+                throw new ArgumentNullException(nameof(token));
+            }
+
+            if (string.IsNullOrEmpty(newPassword))
+            {
+                throw new ArgumentNullException(nameof(newPassword));
+            }
+
+            GalleryUser user = await userManager.FindByIdAsync(userIdentification);
+
+            var resultFactory = new NoResultServiceRequest();
+
+            if (user == null)
+            {
+                return resultFactory.FailedRequest("Used doesnt exist");
+            }
+
+            var resutlToken = await userManager.ResetPasswordAsync(user, token, newPassword);
+
+            if (!resutlToken.Succeeded)
+            {
+                resultFactory.FailedRequest(resutlToken.Errors.Select(item => item.Description).ToList());
+            }
+
+            return resultFactory.SuccessRequest();
+        }
+
+        /// <summary>
+        /// Sign in user using email or username
+        /// </summary>
+        /// <param name="userIdentification">email or username</param>
+        /// <param name="password">password</param>
+        /// <returns>instance of ServiceResult</returns>
+        public virtual async Task<ServiceResult<IUploader>> SignInUserAsync(string userIdentification, string password)
+        {
+            if (string.IsNullOrEmpty(userIdentification))
+            {
+                throw new ArgumentNullException(nameof(userIdentification));
+            }
+
+            if (string.IsNullOrEmpty(password))
+            {
+                throw new ArgumentNullException(nameof(password));
+            }
+
+            IUploader user = null;
+
+            if (userIdentification.Contains("@"))
+            {
+                user = await GetUserByMailAsync(userIdentification);
+            }
+            else
+            {
+                user = await GetUserByUserNameAsync(userIdentification);
+            }
+
+            var serviceResult = new ResultServiceRequest<IUploader>();
+
+            if(user == null)
+            {
+                return serviceResult.FailedRequest("Wrong credentials");
+            }
+
+            var signInResult = await signInManager.PasswordSignInAsync(user as GalleryUser, password, false, false);
+
+            if (!signInResult.Succeeded)
+            {
+                return serviceResult.FailedRequest("Wrong credentials");
+            }
+
+            return serviceResult.SuccessRequest(user);
+        }
+
+        /// <summary>
+        /// Sign out user
+        /// </summary>
+        /// <returns>-</returns>
+        public virtual async Task SignOutUser()
+        {
+            await signInManager.SignOutAsync();
         }
     }
 }

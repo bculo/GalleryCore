@@ -1,11 +1,8 @@
 ﻿
-@{ 
-    //Show navigation based on user role
-}
-
 @if (User.Identity.IsAuthenticated)
 {
     <li class="nav-item">
-        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">LogedIn</a>
+        <a class="nav-link text-dark" asp-controller="Authentication" asp-action="Logout">Logout</a>
     </li>
 }
+

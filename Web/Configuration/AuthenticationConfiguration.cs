@@ -17,7 +17,7 @@ namespace Web.Configuration
         public static void ConfigureAuthentication(this IServiceCollection services)
         {
             SetCookiePolicyOptions(services);
-            SetAuthentication(services);
+            //SetAuthentication(services);
             CreateIdentity(services);
             IdentitySettingSetup(services);
         }
@@ -38,6 +38,7 @@ namespace Web.Configuration
 
         /// <summary>
         /// Set cookie authentication
+        /// If not using identity
         /// </summary>
         /// <param name="services"></param>
         private static void SetAuthentication(IServiceCollection services)
@@ -49,12 +50,10 @@ namespace Web.Configuration
                 options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
             }).AddCookie(options =>
             {
-                options.LoginPath = "/Authentication/Login";
-                options.LogoutPath = "/Authentication/Logout";
-                options.AccessDeniedPath = "/Home/Index";
+                options.LoginPath = "/Authentication/Login/";
                 options.SlidingExpiration = true;
-                options.ExpireTimeSpan = TimeSpan.FromMinutes(15);
-                options.Cookie.Expiration = TimeSpan.FromMinutes(15);
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(1);
+                options.Cookie.Expiration = TimeSpan.FromMinutes(1);
             });
         }
 
@@ -65,8 +64,8 @@ namespace Web.Configuration
         private static void CreateIdentity(IServiceCollection services)
         {
             services.AddIdentity<GalleryUser, IdentityRole>()
-                .AddEntityFrameworkStores<AppIdentityDbContext>()
-                .AddDefaultTokenProviders();
+            .AddEntityFrameworkStores<AppIdentityDbContext>()
+            .AddDefaultTokenProviders();
         }
 
         /// <summary>
@@ -94,6 +93,16 @@ namespace Web.Configuration
                 options.User.AllowedUserNameCharacters =
                     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
                 options.User.RequireUniqueEmail = true;
+            });
+
+            services.ConfigureApplicationCookie(options =>
+            {
+                // Cookie settings
+                options.Cookie.HttpOnly = true;
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(1);
+                options.LoginPath = "/Authentication/Login/";
+                options.AccessDeniedPath = "/Authentication/Login/";
+                options.SlidingExpiration = true;
             });
         }
     }

@@ -1,6 +1,4 @@
 ﻿using ApplicationCore.Interfaces;
-using ApplicationCore.Services.Helpers;
-using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using Web.Filters;
@@ -11,7 +9,6 @@ using Web.Services;
 namespace Web.Controllers
 {
     [ErrorFilter]
-    [ValidateUserLogedIn]
     public class AuthenticationController : Controller
     {
         protected readonly IEmailSender mailService;
@@ -29,10 +26,12 @@ namespace Web.Controllers
         }
 
         [HttpGet]
+        [ValidateUserLogedIn]
         public virtual IActionResult Registration() => View();
 
         [HttpPost]
         [ValidateModel]
+        [ValidateUserLogedIn]
         [ValidateAntiForgeryToken]
         public virtual async Task<IActionResult> Registration(RegistrationModel model)
         {
@@ -52,18 +51,28 @@ namespace Web.Controllers
         }
          
         [HttpGet]
+        [ValidateUserLogedIn]
         public virtual IActionResult Login() => View();
 
         [HttpPost]
         [ValidateModel]
+        [ValidateUserLogedIn]
         [ValidateAntiForgeryToken]
         public virtual async Task<IActionResult> Login(LoginModel model)
         {
-            ModelState.TryAddModelError("InvalidCredentials", "Invalid credentials.");
+            var serviceResult = await authService.SignInUserAsync(model.UserName, model.Password);
+
+            if (serviceResult.Success)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            ModelStateErrorPopulator.FillWithErrors(this, serviceResult.Errors);
             return View(model);
         }
 
         [HttpGet]
+        [ValidateUserLogedIn]
         public virtual async Task<IActionResult> Confirm(string ident, string tok)
         {
             var serviceResult = await authService.VerifyConfirmationTokenAsync(ident, tok);
@@ -72,10 +81,12 @@ namespace Web.Controllers
         }
 
         [HttpGet]
+        [ValidateUserLogedIn]
         public virtual IActionResult PasswordRecovery() => View();
 
         [HttpPost]
         [ValidateModel]
+        [ValidateUserLogedIn]
         [ValidateAntiForgeryToken]
         public virtual async Task<IActionResult> PasswordRecovery(PasswordRecoveryModel model)
         {
@@ -85,7 +96,7 @@ namespace Web.Controllers
             {
                 string token = await authService.CreatePasswordRecoveryTokenAsync(uploader);
                 string url = urlService.CreateUrl(this, uploader.UserId, token, ToString(), nameof(ConfirmPassword));
-                await mailService.SendRegistrationEmailAsync(uploader.UserMail, url, token); //ADD METHOD
+                await mailService.SendPasswordRecoveryAsync(uploader.UserMail, url, token);
                 return RedirectToAction(nameof(Login));
             }
 
@@ -94,7 +105,35 @@ namespace Web.Controllers
         }
 
         [HttpGet]
-        public virtual IActionResult ConfirmPassword(string ident, string to) => View();
+        [ValidateUserLogedIn]
+        public virtual IActionResult ConfirmPassword(string ident, string tok)
+        {
+            var model = new PasswordConfirmationModel
+            {
+                Token = tok,
+                UserId = ident
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateModel]
+        [ValidateUserLogedIn]
+        [ValidateAntiForgeryToken]
+        public virtual async Task<IActionResult> ConfirmPassword(PasswordConfirmationModel model)
+        {
+            var result = await authService.VerifyPasswordRecoveryTokenAsync(model.UserId, model.Token, model.Password);
+            ModelStateErrorPopulator.FillWithErrors(this, result.Errors);
+            return View();
+        }
+
+        [HttpGet]
+        public virtual async Task<IActionResult> Logout()
+        {
+            await authService.SignOutUser();
+            return RedirectToAction("Index", "Home");
+        }
 
         public override string ToString() => nameof(AuthenticationController);
     }

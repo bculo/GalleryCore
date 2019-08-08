@@ -24,46 +24,55 @@ namespace Infrastructure.Services
 
         public virtual Task SendRegistrationEmailAsync(string mail, string callbackURL, string token)
         {
-            CheckInputMail(mail);
-            CheckCallbackURL(callbackURL);
-
+            CheckInputs(mail, callbackURL, token);
             MailFactory mailFactory = MailFactory.GetMailFactory<RegistrationActivationMail>(callbackURL);
+            SendGridMessage msg = PrepareSendGridMessage(mailFactory, mail);
+            return client.SendEmailAsync(msg);
+        }
 
+        public virtual Task SendPasswordRecoveryAsync(string mail, string callbackURL, string token)
+        {
+            CheckInputs(mail, callbackURL, token);
+            MailFactory mailFactory = MailFactory.GetMailFactory<PasswordRecoveryMail>(callbackURL);
+            SendGridMessage msg = PrepareSendGridMessage(mailFactory, mail);
+            return client.SendEmailAsync(msg);
+        }
+
+        public SendGridMessage PrepareSendGridMessage(MailFactory factory, string email)
+        {
             var msg = new SendGridMessage()
             {
                 From = new EmailAddress(mailConfiguration.ApplicationMail),
-                Subject = mailFactory.Subject,
-                PlainTextContent = mailFactory.Content,
-                HtmlContent = mailFactory.Content
+                Subject = factory.Subject,
+                PlainTextContent = factory.Content,
+                HtmlContent = factory.Content
             };
 
-            msg.AddTo(new EmailAddress(mail));
+            msg.AddTo(new EmailAddress(email));
             msg.SetClickTracking(false, false);
 
-            return client.SendEmailAsync(msg); //DONT WAIT
+            return msg;
         }
 
         /// <summary>
         /// Check input mail
         /// </summary>
         /// <param name="mail">mail</param>
-        protected virtual void CheckInputMail(string mail)
+        protected virtual void CheckInputs(string mail, string callbackUrl, string token)
         {
             if(string.IsNullOrWhiteSpace(mail))
             {
                 throw new ArgumentNullException(nameof(mail));
             }
-        }
 
-        /// <summary>
-        /// Check callback url
-        /// </summary>
-        /// <param name="mail">callback url</param>
-        protected virtual void CheckCallbackURL(string url)
-        {
-            if (string.IsNullOrWhiteSpace(url))
+            if (string.IsNullOrWhiteSpace(callbackUrl))
             {
-                throw new ArgumentNullException(nameof(url));
+                throw new ArgumentNullException(nameof(callbackUrl));
+            }
+
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                throw new ArgumentNullException(nameof(token));
             }
         }
     }
