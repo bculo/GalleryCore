@@ -1,5 +1,7 @@
 ﻿using ApplicationCore.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using System.Linq;
 using System.Threading.Tasks;
 using Web.Filters;
 using Web.Interfaces;
@@ -14,11 +16,13 @@ namespace Web.Controllers
         protected readonly IEmailSender mailService;
         protected readonly IUrlGenerator urlService;
         protected readonly IAuthenticationService authService;
+        protected readonly ILogger logger;
 
         public AuthenticationController(
             IAuthenticationService authService,
             IEmailSender mailService,
-            IUrlGenerator urlService)
+            IUrlGenerator urlService,
+            ILogger<AuthenticationController> logger)
         {
             this.mailService = mailService;
             this.urlService = urlService;
@@ -61,6 +65,7 @@ namespace Web.Controllers
         public virtual async Task<IActionResult> Login(LoginModel model)
         {
             var serviceResult = await authService.SignInUserAsync(model.UserName, model.Password);
+            IUploader uploader = serviceResult.Result;
 
             if (serviceResult.Success)
             {
@@ -76,7 +81,16 @@ namespace Web.Controllers
         public virtual async Task<IActionResult> Confirm(string ident, string tok)
         {
             var serviceResult = await authService.VerifyConfirmationTokenAsync(ident, tok);
-            ModelStateErrorPopulator.FillWithErrors(this, serviceResult.Errors);
+
+            if (serviceResult.Success)
+            {
+                ViewBag.Message = "Successful email confirmation";
+            }
+            else
+            {
+                ModelStateErrorPopulator.FillWithErrors(this, serviceResult.Errors);
+            }
+
             return View();
         }
 
@@ -124,7 +138,16 @@ namespace Web.Controllers
         public virtual async Task<IActionResult> ConfirmPassword(PasswordConfirmationModel model)
         {
             var result = await authService.VerifyPasswordRecoveryTokenAsync(model.UserId, model.Token, model.Password);
-            ModelStateErrorPopulator.FillWithErrors(this, result.Errors);
+
+            if (result.Success)
+            {
+                ViewBag.Message = "Successful email confirmation";
+            }
+            else
+            {
+                ModelStateErrorPopulator.FillWithErrors(this, result.Errors);
+            }
+
             return View();
         }
 

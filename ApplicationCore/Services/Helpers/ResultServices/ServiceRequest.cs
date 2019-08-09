@@ -3,7 +3,14 @@ using System.Collections.Generic;
 
 namespace ApplicationCore.Services.Helpers.ResultServices
 {
-    public abstract class ServiceRequest<Type> { 
+    public abstract class ServiceRequest<Type>
+    {
+        public Type InstanceResult { get; set; }
+
+        public bool IsSet
+        {
+            get => (InstanceResult != null) ? true : false;
+        }
 
         /// <summary>
         /// Create instance of ErrorMessage
@@ -36,6 +43,6 @@ namespace ApplicationCore.Services.Helpers.ResultServices
             }
         }
 
-        protected abstract Type CreateInstance(bool success);
+        protected abstract void CreateInstance(bool success);
     }
 }

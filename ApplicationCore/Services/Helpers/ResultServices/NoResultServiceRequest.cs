@@ -6,9 +6,9 @@ namespace ApplicationCore.Services.Helpers.ResultServices
 {
     public class NoResultServiceRequest : ServiceRequest<DefaultServiceResult>
     {
-        protected override DefaultServiceResult CreateInstance(bool success)
+        protected override void CreateInstance(bool success)
         {
-            return new DefaultServiceResult()
+            InstanceResult = new DefaultServiceResult()
             {
                 Success = success ? true : false,
                 Errors = new List<ErrorMessage>()
@@ -17,22 +17,22 @@ namespace ApplicationCore.Services.Helpers.ResultServices
 
         public DefaultServiceResult FailedRequest(List<string> errors)
         {
-            DefaultServiceResult instance = CreateInstance(false);
-            instance.Errors = SetAllErrors(errors).ToList();
-            return instance;
+            CreateInstance(false);
+            InstanceResult.Errors = SetAllErrors(errors).ToList();
+            return InstanceResult;
         }
 
         public DefaultServiceResult FailedRequest(string error)
         {
-            DefaultServiceResult instance = CreateInstance(false);
-            instance.Errors.Add(SetErrorMessage(0.ToString(), error));
-            return instance;
+            CreateInstance(false);
+            InstanceResult.Errors.Add(SetErrorMessage(0.ToString(), error));
+            return InstanceResult;
         }
 
         public DefaultServiceResult SuccessRequest()
         {
-            DefaultServiceResult instance = CreateInstance(true);
-            return instance;
+            CreateInstance(true);
+            return InstanceResult;
         }
     }
 }

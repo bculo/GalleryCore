@@ -1,8 +1,12 @@
 ﻿using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
 using ApplicationCore.Services.Helpers.ResultServices;
+using Infrastructure.Helpers.Http;
 using Infrastructure.IdentityData;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,7 +16,7 @@ namespace Infrastructure.Services
     /// <summary>
     /// Authentication with UserManager and SignInManager
     /// </summary>
-    public class IdentityAuthenticationService : IAuthenticationService
+    public class IdentityAuthenticationService : HttpAccess, IAuthenticationService
     {
         protected readonly UserManager<GalleryUser> userManager;
         protected readonly IAsyncRepository<Uploader> repository;
@@ -25,7 +29,8 @@ namespace Infrastructure.Services
         public IdentityAuthenticationService(
             UserManager<GalleryUser> userManager,
             IAsyncRepository<Uploader> repository,
-            SignInManager<GalleryUser> signInManager)
+            SignInManager<GalleryUser> signInManager,
+            IHttpContextAccessor accessor) : base(accessor)
         {
             this.userManager = userManager;
             this.repository = repository;
@@ -131,26 +136,70 @@ namespace Infrastructure.Services
                 throw new ArgumentNullException(nameof(password));
             }
 
-            var galleryUser = new GalleryUser { Email = email, UserName = userName };
-            var uploader = new Uploader { UserName = userName, Id = galleryUser.Id, Email = email };
-
-            var createResult = await userManager.CreateAsync(galleryUser, password); //Add user to identity database
-
             var resultFactory = new ResultServiceRequest<IUploader>();
 
-            if (!createResult.Succeeded)
+            var instance = GetSpecificInstance<AppIdentityDbContext>();
+            if(instance == null)
             {
-                return resultFactory.FailedRequest(createResult.Errors
-                    .Select(item => item.Description)
-                    .ToList());
+                return resultFactory.FailedRequest("Problem with server, try again later");
             }
 
-            var roleResult = userManager.AddToRoleAsync(galleryUser, Role.User.Name); //Adding role to the user
-            var createGalleryUser = repository.AddAsync(uploader); // add user to image gallery database
+            var galleryUser = new GalleryUser { Email = email, UserName = userName };
 
-            await Task.WhenAll(createGalleryUser, roleResult);
+            await ExecuteRegistrationTransaction(instance, galleryUser, password, resultFactory);
 
-            return resultFactory.SuccessRequest(galleryUser);
+            return resultFactory.InstanceResult;
+        }
+
+        /// <summary>
+        /// Execute transaction
+        /// </summary>
+        /// <param name="strategy"></param>
+        /// <returns></returns>
+        protected async Task ExecuteRegistrationTransaction(DbContext database, IUploader user, string password,
+            ResultServiceRequest<IUploader> serviceResult)
+        {
+            IExecutionStrategy databaseStrategy = database.Database.CreateExecutionStrategy();
+
+            await databaseStrategy.ExecuteAsync(async () =>
+            {
+                using (var transaction = database.Database.BeginTransaction())
+                {
+                    try
+                    {
+                        var createResult = await userManager.CreateAsync(user as GalleryUser, password); //Add user to identity database
+                        if (!createResult.Succeeded) //Check status of operation
+                        {
+                            serviceResult.FailedRequest(createResult.Errors.Select(item => item.Description).ToList());
+                            throw new Exception("Failed to add user to identity database");
+                        }
+
+                        var roleResult = userManager.AddToRoleAsync(user as GalleryUser, Role.User.Name); //Add role to user in identity database
+                        var galleryDatabase = repository.AddAsync(user.ToDomainModel());
+
+                        await Task.WhenAll(roleResult, galleryDatabase); // wait tasks to finish
+
+                        if (!roleResult.Result.Succeeded) // Check status of adding role to user
+                        {
+                            serviceResult.FailedRequest("Problem with registration");
+                            throw new Exception("Failed to add role to user");
+                        }
+
+                        if (!string.IsNullOrEmpty(galleryDatabase.Result.Item2)) //Check status of adding user to gallery database
+                        {
+                            serviceResult.FailedRequest("Problem with registration");
+                            throw new Exception("Failed to add role to user");
+                        }
+
+                        transaction.Commit(); // commit transaction
+                        serviceResult.SuccessRequest(user);
+                    }
+                    catch
+                    {
+                        serviceResult.FailedRequest("Problem with registration");
+                    }
+                }
+            });
         }
 
         /// <summary>

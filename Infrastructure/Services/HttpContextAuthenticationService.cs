@@ -1,19 +1,25 @@
 ﻿using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
+using ApplicationCore.Services.Helpers.ResultServices;
+using Infrastructure.Data.EntityFramework;
 using Infrastructure.Helpers.Claim;
+using Infrastructure.Helpers.Http;
+using Infrastructure.IdentityData;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Threading.Tasks;
+using System.Transactions;
 
 namespace Infrastructure.Services
 {
     /// <summary>
     /// Another way of implementing IAuthenticationService using IHttpContextAccessor
     /// </summary>
-    public class HttpContextAuthenticationService : IAuthenticationService
+    public class HttpContextAuthenticationService : HttpAccess, IAuthenticationService
     {
         protected readonly IAsyncRepository<Uploader> repository;
-        protected readonly IHttpContextAccessor accessor;
 
         private IClaimMaker maker;
 
@@ -30,20 +36,11 @@ namespace Infrastructure.Services
             }
         }
 
-        protected HttpContext Http
-        {
-            get
-            {
-                return accessor?.HttpContext;
-            }
-        }
-
         public HttpContextAuthenticationService(
             IAsyncRepository<Uploader> repository,
-            IHttpContextAccessor accessor)
+            IHttpContextAccessor accessor) : base(accessor)
         {
             this.repository = repository;
-            this.accessor = accessor;
         }
 
         public virtual Task<string> CreateConfirmationTokenAsync(IUploader uploader)

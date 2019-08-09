@@ -11,9 +11,8 @@
         <div asp-validation-summary="All"></div>
     </div>
 }
-else
-{
-    <p>Email is successfuly confirmed</p>
-}
+
+@(ViewBag.Message ?? string.Empty)
+
 
 <a asp-controller="Home" asp-action="Index">Home page</a>
