@@ -1,4 +1,5 @@
 ﻿using ApplicationCore.Entities;
+using ApplicationCore.Helpers.Service;
 using System.Threading.Tasks;
 
 namespace ApplicationCore.Interfaces
@@ -14,8 +15,8 @@ namespace ApplicationCore.Interfaces
 
         Task<ServiceResult<IUploader>> RegisterUserAsync(string userName, string email, string password);
         Task<ServiceResult<IUploader>> SignInUserAsync(string userIdentification, string password);
-        Task<DefaultServiceResult> VerifyConfirmationTokenAsync(string userId, string token);
-        Task<DefaultServiceResult> VerifyPasswordRecoveryTokenAsync(string userId, string token, string newPassword);
+        Task<ServiceNoResult> VerifyConfirmationTokenAsync(string userId, string token);
+        Task<ServiceNoResult> VerifyPasswordRecoveryTokenAsync(string userId, string token, string newPassword);
 
         Task SignOutUser();
     }

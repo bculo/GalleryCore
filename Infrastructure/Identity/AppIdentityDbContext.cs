@@ -1,4 +1,5 @@
 ﻿using Infrastructure.Identity;
+using Infrastructure.Identity.Configuration;
 using Infrastructure.IdentityData.Configuration;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +19,7 @@ namespace Infrastructure.IdentityData
         {
             base.OnModelCreating(builder);
             builder.ApplyConfiguration(new RoleConfiguration());
+            builder.ApplyConfiguration(new GalleryUserConfiguration());
         }
     }
 }

@@ -6,6 +6,8 @@ namespace Infrastructure.IdentityData
 {
     public sealed class GalleryUser : IdentityUser, IUploader
     {
+        private Uploader Uploader { get; set; }
+
         public string UserId
         {
             get
@@ -28,12 +30,17 @@ namespace Infrastructure.IdentityData
         /// <returns>Uploader instance</returns>
         public Uploader ToDomainModel()
         {
-            return new Uploader
+            if (Uploader == null)
             {
-                Id = Id,
-                UserName = UserName,
-                Email = Email,
-            };
+                Uploader = new Uploader
+                {
+                    Id = Id,
+                    UserName = UserName,
+                    Email = Email,
+                };
+            }
+
+            return Uploader;
         }
 
         public override string ToString() => UserName;

@@ -1,6 +1,6 @@
 ﻿using ApplicationCore.Entities;
+using ApplicationCore.Helpers.Service;
 using ApplicationCore.Interfaces;
-using ApplicationCore.Services.Helpers.ResultServices;
 using Infrastructure.Helpers.Http;
 using Infrastructure.IdentityData;
 using Microsoft.AspNetCore.Http;
@@ -136,7 +136,7 @@ namespace Infrastructure.Services
                 throw new ArgumentNullException(nameof(password));
             }
 
-            var resultFactory = new ResultServiceRequest<IUploader>();
+            var resultFactory = new RequestWithResult<IUploader>();
 
             var instance = GetSpecificInstance<AppIdentityDbContext>();
             if(instance == null)
@@ -157,7 +157,7 @@ namespace Infrastructure.Services
         /// <param name="strategy"></param>
         /// <returns></returns>
         protected async Task ExecuteRegistrationTransaction(DbContext database, IUploader user, string password,
-            ResultServiceRequest<IUploader> serviceResult)
+            RequestWithResult<IUploader> serviceResult)
         {
             IExecutionStrategy databaseStrategy = database.Database.CreateExecutionStrategy();
 
@@ -208,7 +208,7 @@ namespace Infrastructure.Services
         /// <param name="userId">user id</param>
         /// <param name="token">user token</param>
         /// <returns>instance of DefaultServiceResult</returns>
-        public virtual async Task<DefaultServiceResult> VerifyConfirmationTokenAsync(string userId, string token)
+        public virtual async Task<ServiceNoResult> VerifyConfirmationTokenAsync(string userId, string token)
         {
             if (string.IsNullOrEmpty(userId))
             {
@@ -222,7 +222,7 @@ namespace Infrastructure.Services
 
             GalleryUser user = await userManager.FindByIdAsync(userId);
 
-            var resultFactory = new NoResultServiceRequest();
+            var resultFactory = new RequestNoResult();
 
             if (user == null)
             {
@@ -241,7 +241,7 @@ namespace Infrastructure.Services
         /// <param name="token">user token</param>
         /// <param name="newPassword">new user password</param>
         /// <returns>instance of DefaultServiceResult</returns>
-        public virtual async Task<DefaultServiceResult> VerifyPasswordRecoveryTokenAsync(string userIdentification, string token, string newPassword)
+        public virtual async Task<ServiceNoResult> VerifyPasswordRecoveryTokenAsync(string userIdentification, string token, string newPassword)
         {
             if (string.IsNullOrEmpty(userIdentification))
             {
@@ -260,7 +260,7 @@ namespace Infrastructure.Services
 
             GalleryUser user = await userManager.FindByIdAsync(userIdentification);
 
-            var resultFactory = new NoResultServiceRequest();
+            var resultFactory = new RequestNoResult();
 
             if (user == null)
             {
@@ -306,7 +306,7 @@ namespace Infrastructure.Services
                 user = await GetUserByUserNameAsync(userIdentification);
             }
 
-            var serviceResult = new ResultServiceRequest<IUploader>();
+            var serviceResult = new RequestWithResult<IUploader>();
 
             if(user == null)
             {

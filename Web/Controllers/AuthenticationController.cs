@@ -1,12 +1,12 @@
-﻿using ApplicationCore.Interfaces;
+﻿using ApplicationCore.Extensions;
+using ApplicationCore.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System.Linq;
 using System.Threading.Tasks;
+using Web.Extensions;
 using Web.Filters;
 using Web.Interfaces;
 using Web.Models.Authentication;
-using Web.Services;
 
 namespace Web.Controllers
 {
@@ -50,7 +50,7 @@ namespace Web.Controllers
                 return RedirectToAction(nameof(Login));
             }
 
-            ModelStateErrorPopulator.FillWithErrors(this, serviceResult.Errors);
+            ModelState.FillWithErrors(serviceResult.Errors);
             return View(model);
         }
          
@@ -65,14 +65,13 @@ namespace Web.Controllers
         public virtual async Task<IActionResult> Login(LoginModel model)
         {
             var serviceResult = await authService.SignInUserAsync(model.UserName, model.Password);
-            IUploader uploader = serviceResult.Result;
 
             if (serviceResult.Success)
             {
                 return RedirectToAction("Index", "Home");
             }
 
-            ModelStateErrorPopulator.FillWithErrors(this, serviceResult.Errors);
+            ModelState.FillWithErrors(serviceResult.Errors);
             return View(model);
         }
 
@@ -88,7 +87,7 @@ namespace Web.Controllers
             }
             else
             {
-                ModelStateErrorPopulator.FillWithErrors(this, serviceResult.Errors);
+                ModelState.FillWithErrors(serviceResult.Errors);
             }
 
             return View();
@@ -114,7 +113,7 @@ namespace Web.Controllers
                 return RedirectToAction(nameof(Login));
             }
 
-            ModelState.TryAddModelError("User", "User doesnt exist");
+            ModelState.AddError("User", "User doesnt exist");
             return View();
         }
 
@@ -145,7 +144,7 @@ namespace Web.Controllers
             }
             else
             {
-                ModelStateErrorPopulator.FillWithErrors(this, result.Errors);
+                ModelState.FillWithErrors(result.Errors);
             }
 
             return View();

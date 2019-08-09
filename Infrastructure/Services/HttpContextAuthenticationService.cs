@@ -1,16 +1,11 @@
 ﻿using ApplicationCore.Entities;
+using ApplicationCore.Helpers.Service;
 using ApplicationCore.Interfaces;
-using ApplicationCore.Services.Helpers.ResultServices;
-using Infrastructure.Data.EntityFramework;
 using Infrastructure.Helpers.Claim;
 using Infrastructure.Helpers.Http;
-using Infrastructure.IdentityData;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Threading.Tasks;
-using System.Transactions;
 
 namespace Infrastructure.Services
 {
@@ -83,12 +78,12 @@ namespace Infrastructure.Services
             throw new NotImplementedException();
         }
 
-        public virtual Task<DefaultServiceResult> VerifyConfirmationTokenAsync(string userId, string token)
+        public virtual Task<ServiceNoResult> VerifyConfirmationTokenAsync(string userId, string token)
         {
             throw new NotImplementedException();
         }
 
-        public virtual Task<DefaultServiceResult> VerifyPasswordRecoveryTokenAsync(string userId, string token, string newPassword)
+        public virtual Task<ServiceNoResult> VerifyPasswordRecoveryTokenAsync(string userId, string token, string newPassword)
         {
             throw new NotImplementedException();
         }

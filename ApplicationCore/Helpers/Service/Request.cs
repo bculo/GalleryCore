@@ -1,9 +1,9 @@
 ﻿using ApplicationCore.Entities;
 using System.Collections.Generic;
 
-namespace ApplicationCore.Services.Helpers.ResultServices
+namespace ApplicationCore.Helpers.Service
 {
-    public abstract class ServiceRequest<Type>
+    public abstract class Request<Type>
     {
         public Type InstanceResult { get; set; }
 

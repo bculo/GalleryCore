@@ -1,6 +1,5 @@
 ﻿using ApplicationCore.Interfaces;
 using ApplicationCore.Services;
-using ApplicationCore.Services.Helpers;
 using Infrastructure.Data.EntityFramework;
 using Infrastructure.Data.EntityFramework.Repository;
 using Infrastructure.Services;
@@ -19,8 +18,6 @@ namespace Web.Configuration
         public static void ConfigureServices(this IServiceCollection services)
         {
             //Core project
-            services.AddScoped<IUniqueStringGenerator, GuidStringGenerator>();
-            services.AddScoped<IPasswordHasher, PasswordHasher>();
             services.AddScoped<ICategoryService, CategoryService>();
 
             //Infrastracture project
