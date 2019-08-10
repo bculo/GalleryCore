@@ -26,7 +26,7 @@ namespace Infrastructure.Data.EntityFramework.Repository
         /// </summary>
         /// <param name="entity">new instance</param>
         /// <returns>error message if error happaned, otherwise return instance</returns>
-        public virtual async Task<(T, string)> AddAsync(T entity)
+        public virtual async Task<(T instance, string errorMessage)> AddAsync(T entity)
         {
             try
             {
@@ -55,14 +55,18 @@ namespace Infrastructure.Data.EntityFramework.Repository
         /// </summary>
         /// <param name="entity">The instance we want to delete</param>
         /// <returns></returns>
-        public virtual async Task DeleteAsync(T entity)
+        public virtual async Task<bool> DeleteAsync(T entity)
         {
             try
             {
                 dbContext.Set<T>().Remove(entity);
                 await dbContext.SaveChangesAsync();
+                return true;
             }
-            catch { }
+            catch
+            {
+                return false;
+            }
         }
 
         /// <summary>
@@ -97,17 +101,17 @@ namespace Infrastructure.Data.EntityFramework.Repository
         /// </summary>
         /// <param name="entity">Instance we want do update</param>
         /// <returns></returns>
-        public virtual async Task<string> UpdateAsync(T entity)
+        public virtual async Task<bool> UpdateAsync(T entity)
         {
             try
             {
                 dbContext.Entry(entity).State = EntityState.Modified;
                 await dbContext.SaveChangesAsync();
-                return string.Empty;
+                return true;
             }
-            catch(DbUpdateException e)
+            catch
             {
-                return e?.InnerException?.Message ?? e.Message;
+                return false;
             }
         }
 

@@ -1,6 +1,4 @@
-﻿using ApplicationCore.Entities;
-
-namespace ApplicationCore.Interfaces
+﻿namespace ApplicationCore.Interfaces
 {
     public interface IDomainModel<T> where T : class
     {

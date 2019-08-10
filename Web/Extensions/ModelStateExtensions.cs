@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Web.Extensions
 {
-    public static class ModelStateExtension
+    public static class ModelStateExtensions
     {
         public static void FillWithErrors(this ModelStateDictionary modelstate, List<string> errors)
         {

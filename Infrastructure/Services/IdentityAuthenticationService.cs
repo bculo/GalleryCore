@@ -1,13 +1,17 @@
 ﻿using ApplicationCore.Entities;
+using ApplicationCore.Helpers.Auth;
 using ApplicationCore.Helpers.Service;
 using ApplicationCore.Interfaces;
+using Infrastructure.Helpers.AuthProperties;
 using Infrastructure.Helpers.Http;
 using Infrastructure.IdentityData;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -16,7 +20,7 @@ namespace Infrastructure.Services
     /// <summary>
     /// Authentication with UserManager and SignInManager
     /// </summary>
-    public class IdentityAuthenticationService : HttpAccess, IAuthenticationService
+    public class IdentityAuthenticationService : HttpAccess, ApplicationCore.Interfaces.IAuthenticationService
     {
         protected readonly UserManager<GalleryUser> userManager;
         protected readonly IAsyncRepository<Uploader> repository;
@@ -139,7 +143,7 @@ namespace Infrastructure.Services
             var resultFactory = new RequestWithResult<IUploader>();
 
             var instance = GetSpecificInstance<AppIdentityDbContext>();
-            if(instance == null)
+            if (instance == null)
             {
                 return resultFactory.FailedRequest("Problem with server, try again later");
             }
@@ -156,7 +160,7 @@ namespace Infrastructure.Services
         /// </summary>
         /// <param name="strategy"></param>
         /// <returns></returns>
-        protected async Task ExecuteRegistrationTransaction(DbContext database, IUploader user, string password,
+        protected virtual async Task ExecuteRegistrationTransaction(DbContext database, IUploader user, string password,
             RequestWithResult<IUploader> serviceResult)
         {
             IExecutionStrategy databaseStrategy = database.Database.CreateExecutionStrategy();
@@ -226,7 +230,7 @@ namespace Infrastructure.Services
 
             if (user == null)
             {
-                return resultFactory.FailedRequest("Used doenst exist");
+                return resultFactory.FailedRequest("Used doesnt exist");
             }
 
             var resutlToken = await userManager.ConfirmEmailAsync(user, token);
@@ -308,7 +312,7 @@ namespace Infrastructure.Services
 
             var serviceResult = new RequestWithResult<IUploader>();
 
-            if(user == null)
+            if (user == null)
             {
                 return serviceResult.FailedRequest("Wrong credentials");
             }
@@ -330,6 +334,55 @@ namespace Infrastructure.Services
         public virtual async Task SignOutUser()
         {
             await signInManager.SignOutAsync();
+        }
+
+        /// <summary>
+        /// Properties for external authentication (facebook, google ...)
+        /// </summary>
+        /// <param name="provider">name of provider</param>
+        /// <param name="redirectUrl">provider should redirect to</param>
+        /// <returns>instance of IExternalAuthProperties</returns>
+        public virtual async Task<ServiceResult<IExternalAuthProperties>> GetAuthProperties(string provider, string redirectUrl)
+        {
+            if (string.IsNullOrEmpty(provider))
+            {
+                throw new ArgumentNullException(nameof(provider));
+            }
+
+            if (string.IsNullOrEmpty(redirectUrl))
+            {
+                throw new ArgumentNullException(nameof(redirectUrl));
+            }
+
+            var result = new RequestWithResult<IExternalAuthProperties>();
+
+            var allAuthScheme = (await signInManager.GetExternalAuthenticationSchemesAsync())
+                .Select(item => item.Name)
+                .ToList();
+
+            if (!allAuthScheme.Contains(provider))
+            {
+                return result.FailedRequest("Requested provider doesnt exist");
+            }
+
+            AuthenticationProperties prop = signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+            return result.SuccessRequest(new GalleryAuthenticationProperties(prop.Items, prop.RedirectUri));
+        }
+
+        /// <summary>
+        /// Validate social login status
+        /// </summary>
+        /// <returns>true if everything good</returns>
+        protected virtual async Task<Dictionary<string, string>> GetExternalAuthenticationClaims()
+        {
+            var result = await signInManager.GetExternalLoginInfoAsync();
+
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> ExecuteExternalLogin()
+        {
+            throw new NotImplementedException();
         }
     }
 }

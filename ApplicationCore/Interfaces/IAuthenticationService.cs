@@ -1,4 +1,4 @@
-﻿using ApplicationCore.Entities;
+﻿using ApplicationCore.Helpers.Auth;
 using ApplicationCore.Helpers.Service;
 using System.Threading.Tasks;
 
@@ -17,6 +17,10 @@ namespace ApplicationCore.Interfaces
         Task<ServiceResult<IUploader>> SignInUserAsync(string userIdentification, string password);
         Task<ServiceNoResult> VerifyConfirmationTokenAsync(string userId, string token);
         Task<ServiceNoResult> VerifyPasswordRecoveryTokenAsync(string userId, string token, string newPassword);
+
+        //External authentication
+        Task<ServiceResult<IExternalAuthProperties>> GetAuthProperties(string provider, string redirectUrl);
+        Task<bool> ExecuteExternalLogin();
 
         Task SignOutUser();
     }

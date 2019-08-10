@@ -1,4 +1,5 @@
-﻿using ApplicationCore.Interfaces;
+﻿using ApplicationCore.Helpers.Mail;
+using ApplicationCore.Interfaces;
 using Infrastructure.Helpers.Mail;
 using Microsoft.Extensions.Options;
 using SendGrid;

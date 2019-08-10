@@ -1,4 +1,5 @@
 ﻿@model Web.Models.Authentication.LoginModel
+@inject Microsoft.AspNetCore.Authentication.IAuthenticationSchemeProvider schemeProvider
 
 @{
     ViewData["Title"] = "Login";
@@ -35,6 +36,16 @@
 
             <a asp-action="PasswordRecovery" asp-controller="Authentication">Forgout account?</a>
         </form>
+
+        <hr />
+
+        <div>
+            @foreach (var item in await schemeProvider.GetRequestHandlerSchemesAsync())
+            {
+                <a asp-action="LogInExternal" asp-route-externalAuthScheme="@item.Name" class="btn btn-lg btn-default">@item.DisplayName</a>
+            }
+        </div>
+
     </div>
 </div>
 

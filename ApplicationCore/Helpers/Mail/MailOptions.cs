@@ -1,6 +1,6 @@
-﻿namespace Infrastructure.Helpers.Mail
+﻿namespace ApplicationCore.Helpers.Mail
 {
-    public class MailOptions
+    public sealed class MailOptions
     {
         public string User { get; set; }
         public string Key { get; set; }

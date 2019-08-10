@@ -7,8 +7,6 @@ namespace ApplicationCore.Interfaces
     /// </summary>
     public interface IUploader : IDomainModel<Uploader>
     {
-        
-
         string UserId { get; }
         string UserName { get; }
         string UserMail { get; }

@@ -1,4 +1,4 @@
-﻿using Infrastructure.Helpers.Mail;
+﻿using ApplicationCore.Helpers.Mail;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 

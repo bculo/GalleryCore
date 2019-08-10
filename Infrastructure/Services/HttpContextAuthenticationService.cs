@@ -1,8 +1,12 @@
 ﻿using ApplicationCore.Entities;
+using ApplicationCore.Helpers.Auth;
+using ApplicationCore.Helpers.Generator;
+using ApplicationCore.Helpers.Security;
 using ApplicationCore.Helpers.Service;
 using ApplicationCore.Interfaces;
 using Infrastructure.Helpers.Claim;
 using Infrastructure.Helpers.Http;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Threading.Tasks;
@@ -11,10 +15,13 @@ namespace Infrastructure.Services
 {
     /// <summary>
     /// Another way of implementing IAuthenticationService using IHttpContextAccessor
+    /// We dont need to use microsoft identity for authentication
     /// </summary>
-    public class HttpContextAuthenticationService : HttpAccess, IAuthenticationService
+    public class HttpContextAuthenticationService : HttpAccess, ApplicationCore.Interfaces.IAuthenticationService
     {
         protected readonly IAsyncRepository<Uploader> repository;
+        protected readonly IUniqueStringGenerator generator;
+        protected readonly IHasher hasher;
 
         private IClaimMaker maker;
 
@@ -33,9 +40,13 @@ namespace Infrastructure.Services
 
         public HttpContextAuthenticationService(
             IAsyncRepository<Uploader> repository,
-            IHttpContextAccessor accessor) : base(accessor)
+            IHttpContextAccessor accessor,
+            IUniqueStringGenerator generator,
+            IHasher hasher) : base(accessor)
         {
             this.repository = repository;
+            this.generator = generator;
+            this.hasher = hasher;
         }
 
         public virtual Task<string> CreateConfirmationTokenAsync(IUploader uploader)
@@ -73,9 +84,13 @@ namespace Infrastructure.Services
             throw new NotImplementedException();
         }
 
-        public virtual Task SignOutUser()
+        /// <summary>
+        /// Sign out user
+        /// </summary>
+        /// <returns>-</returns>
+        public virtual async Task SignOutUser()
         {
-            throw new NotImplementedException();
+            await Http.SignOutAsync();
         }
 
         public virtual Task<ServiceNoResult> VerifyConfirmationTokenAsync(string userId, string token)
@@ -84,6 +99,32 @@ namespace Infrastructure.Services
         }
 
         public virtual Task<ServiceNoResult> VerifyPasswordRecoveryTokenAsync(string userId, string token, string newPassword)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ServiceResult<IExternalAuthProperties>> GetAuthProperties(string provider, string redirectUrl)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Validate social login status
+        /// </summary>
+        /// <returns>true if everything good</returns>
+        public virtual async Task<bool> ValidteExternalAuthentication()
+        {
+            var result = await Http.AuthenticateAsync("ExternalLogin");
+
+            if (!result.Succeeded)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public Task<bool> ExecuteExternalLogin()
         {
             throw new NotImplementedException();
         }

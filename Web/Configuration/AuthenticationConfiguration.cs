@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 
@@ -15,12 +16,23 @@ namespace Web.Configuration
         /// Configure application authentication
         /// </summary>
         /// <param name="services">IServiceCollection instance</param>
-        public static void ConfigureAuthentication(this IServiceCollection services)
+        public static void ConfigureAuthentication(this IServiceCollection services, IConfiguration configuration)
         {
             SetCookiePolicyOptions(services);
-            //SetAuthentication(services);
-            CreateIdentity(services);
-            IdentitySettingSetup(services);
+            //SetAuthenticationWithNoIdentity(services, configuration); //No Identity
+            AddExternalAuthenticationWithIdentity(services, configuration); //Identity
+            CreateIdentity(services); //Identity
+            IdentitySettingSetup(services); //Identity
+        }
+
+        private static void AddExternalAuthenticationWithIdentity(IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddAuthentication()
+            .AddFacebook(options =>
+            {
+                options.AppId = configuration["Authentication:Facebook:AppId"];
+                options.AppSecret = configuration["Authentication:Facebook:AppSecret"];
+            });
         }
 
         /// <summary>
@@ -38,24 +50,30 @@ namespace Web.Configuration
         }
 
         /// <summary>
-        /// Set cookie authentication
+        /// Set cookie authentication, and social authentication
         /// If not using identity
         /// </summary>
         /// <param name="services"></param>
-        private static void SetAuthentication(IServiceCollection services)
+        private static void SetAuthenticationWithNoIdentity(IServiceCollection services, IConfiguration configuration)
         {
-            services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            }).AddCookie(options =>
+            
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+            .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
             {
                 options.LoginPath = "/Authentication/Login/";
                 options.SlidingExpiration = true;
-                options.ExpireTimeSpan = TimeSpan.FromMinutes(1);
-                options.Cookie.Expiration = TimeSpan.FromMinutes(1);
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
+                options.Cookie.Expiration = TimeSpan.FromMinutes(10);
+            })
+            .AddCookie("ExternalLogin")
+            .AddFacebook(options =>
+            {
+                options.SignInScheme = "ExternalLogin";
+                options.AppId = configuration["Authentication:Facebook:AppId"];
+                options.AppSecret = configuration["Authentication:Facebook:AppSecret"];
             });
+
+            //Read information from HttpContext => await HttpContext.AuthenticateAsync("ExternalLogin");
         }
 
         /// <summary>

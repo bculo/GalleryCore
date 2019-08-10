@@ -1,4 +1,4 @@
-﻿namespace ApplicationCore.Interfaces
+﻿namespace ApplicationCore.Helpers.Generator
 {
     public interface IUniqueStringGenerator
     {

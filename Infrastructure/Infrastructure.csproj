@@ -65,4 +65,8 @@
     </Reference>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="CustomIdentity\" />
+  </ItemGroup>
+
 </Project>
