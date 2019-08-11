@@ -12,8 +12,8 @@ namespace Web.Configuration
         /// <summary>
         /// Set up a database and resilient connection
         /// </summary>
-        /// <param name="services"></param>
-        /// <param name="configuration"></param>
+        /// <param name="services">IServiceCollection instance</param>
+        /// <param name="configuration">IConfiguration instance</param>
         public static void ConfigureDatabase(this IServiceCollection services, IConfiguration configuration)
         {
             //Read settings from appsettings.json for resilient connection
@@ -24,7 +24,6 @@ namespace Web.Configuration
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"), 
                 sqlServerOptionsAction: sqlOptions =>
                 {
-                    //Resilient Connections options
                     sqlOptions.EnableRetryOnFailure(
                         maxRetryCount: settings.MaxRetryCount,
                         maxRetryDelay: TimeSpan.FromSeconds(settings.MaxRetryDelay),
@@ -37,7 +36,6 @@ namespace Web.Configuration
                 options.UseSqlServer(configuration.GetConnectionString("IdentityConnection"),
                 sqlServerOptionsAction: sqlOptions =>
                 {
-                    //Resilient Connections options
                     sqlOptions.EnableRetryOnFailure(
                         maxRetryCount: settings.MaxRetryCount,
                         maxRetryDelay: TimeSpan.FromSeconds(settings.MaxRetryDelay),

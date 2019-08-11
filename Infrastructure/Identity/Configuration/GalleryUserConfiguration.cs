@@ -10,6 +10,9 @@ namespace Infrastructure.Identity.Configuration
         {
             builder.Ignore(item => item.UserId);
             builder.Ignore(item => item.UserMail);
+
+            builder.Property(item => item.IsExternal)
+                .HasDefaultValue(false);
         }
     }
 }

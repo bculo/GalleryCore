@@ -22,9 +22,10 @@ namespace Web
             services.ConfigureAuthentication(Configuration);
             services.ConfigureDatabase(Configuration);
             services.ConfigureMail(Configuration);
-            services.ConfigureServices();
+            services.ConfigureServices(Configuration);
             services.ConfigureAutoMapper();
 
+            services.AddDataProtection();
             services.AddHttpContextAccessor();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
@@ -47,7 +48,8 @@ namespace Web
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseCookiePolicy();
-            app.UseAuthentication();
+
+            app.UseAuthentication(); //Importanz part for authentication
 
             app.UseMvc(routes =>
             {

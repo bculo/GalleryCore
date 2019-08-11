@@ -19,7 +19,7 @@ namespace ApplicationCore.Interfaces
         Task<ServiceNoResult> VerifyPasswordRecoveryTokenAsync(string userId, string token, string newPassword);
 
         //External authentication
-        Task<ServiceResult<IExternalAuthProperties>> GetAuthProperties(string provider, string redirectUrl);
+        Task<ServiceResult<IAuthProperties>> GetAuthProperties(string provider, string redirectUrl);
         Task<bool> ExecuteExternalLogin();
 
         Task SignOutUser();

@@ -4,11 +4,14 @@ using ApplicationCore.Helpers.Generator;
 using ApplicationCore.Helpers.Security;
 using ApplicationCore.Helpers.Service;
 using ApplicationCore.Interfaces;
+using Infrastructure.Helpers.Auth;
 using Infrastructure.Helpers.Claim;
 using Infrastructure.Helpers.Http;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Infrastructure.Services
@@ -19,9 +22,13 @@ namespace Infrastructure.Services
     /// </summary>
     public class HttpContextAuthenticationService : HttpAccess, ApplicationCore.Interfaces.IAuthenticationService
     {
+        //TODO
+        //REMOVE IHasher and IUniqueStringGenerator in customIdentityFolder
+
         protected readonly IAsyncRepository<Uploader> repository;
-        protected readonly IUniqueStringGenerator generator;
-        protected readonly IHasher hasher;
+        protected readonly IUniqueStringGenerator generator; //move
+        protected readonly IHasher hasher; //move
+        protected readonly IAuthenticationSchemeProvider schemeProvider;
 
         private IClaimMaker maker;
 
@@ -41,12 +48,14 @@ namespace Infrastructure.Services
         public HttpContextAuthenticationService(
             IAsyncRepository<Uploader> repository,
             IHttpContextAccessor accessor,
-            IUniqueStringGenerator generator,
-            IHasher hasher) : base(accessor)
+            IUniqueStringGenerator generator, //move
+            IHasher hasher, //move
+            IAuthenticationSchemeProvider schemeProvider) : base(accessor)
         {
             this.repository = repository;
             this.generator = generator;
             this.hasher = hasher;
+            this.schemeProvider = schemeProvider;
         }
 
         public virtual Task<string> CreateConfirmationTokenAsync(IUploader uploader)
@@ -103,16 +112,44 @@ namespace Infrastructure.Services
             throw new NotImplementedException();
         }
 
-        public Task<ServiceResult<IExternalAuthProperties>> GetAuthProperties(string provider, string redirectUrl)
+        /// <summary>
+        /// Configure authentication configuration for external login
+        /// </summary>
+        /// <param name="provider">name of social provider</param>
+        /// <param name="redirectUrl">where should social provider redirect</param>
+        /// <returns>Instance of ServiceResult</returns>
+        public virtual async Task<ServiceResult<IAuthProperties>> GetAuthProperties(string provider, string redirectUrl)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(provider))
+            {
+                throw new ArgumentNullException(nameof(provider));
+            }
+
+            if (string.IsNullOrEmpty(redirectUrl))
+            {
+                throw new ArgumentNullException(nameof(redirectUrl));
+            }
+
+            var result = new RequestWithResult<IAuthProperties>();
+
+            var allAuthScheme = (await schemeProvider.GetRequestHandlerSchemesAsync())
+                .Select(item => item.Name)
+                .ToList();
+
+            if (!allAuthScheme.Contains(provider))
+            {
+                return result.FailedRequest("Requested provider is not supported");
+            }
+
+            var items = new Dictionary<string, string>()
+            {
+                { "LoginProvider", provider }
+            };
+
+            return result.SuccessRequest(new ExternalAuthProperties(redirectUrl, items));
         }
 
-        /// <summary>
-        /// Validate social login status
-        /// </summary>
-        /// <returns>true if everything good</returns>
-        public virtual async Task<bool> ValidteExternalAuthentication()
+        public virtual async Task<bool> ExecuteExternalLogin()
         {
             var result = await Http.AuthenticateAsync("ExternalLogin");
 
@@ -121,11 +158,6 @@ namespace Infrastructure.Services
                 return false;
             }
 
-            return true;
-        }
-
-        public Task<bool> ExecuteExternalLogin()
-        {
             throw new NotImplementedException();
         }
     }

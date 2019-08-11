@@ -67,6 +67,7 @@
 
   <ItemGroup>
     <Folder Include="CustomIdentity\" />
+    <Folder Include="Helpers\AuthProperties\" />
   </ItemGroup>
 
 </Project>

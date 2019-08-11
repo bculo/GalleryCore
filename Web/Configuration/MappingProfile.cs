@@ -1,6 +1,8 @@
 ﻿using ApplicationCore.Entities;
+using ApplicationCore.Helpers.Auth;
 using AutoMapper;
 using Infrastructure.IdentityData;
+using Microsoft.AspNetCore.Authentication;
 using Web.Models.Authentication;
 using Web.Models.Category;
 
@@ -17,6 +19,7 @@ namespace Web.Configuration
             CreateMap<LoginModel, Uploader>();
             CreateMap<Category, CategoryModel>();
             CreateMap<RegistrationModel, GalleryUser>();
+            CreateMap<IAuthProperties, AuthenticationProperties>();
         }
     }
 }

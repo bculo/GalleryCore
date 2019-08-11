@@ -8,6 +8,8 @@ namespace Infrastructure.IdentityData
     {
         private Uploader Uploader { get; set; }
 
+        public bool IsExternal { get; set; }
+
         public string UserId
         {
             get

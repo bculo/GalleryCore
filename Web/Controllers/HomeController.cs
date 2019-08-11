@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using Web.Extensions;
 using Web.Models;
 
 namespace Web.Controllers
@@ -9,13 +10,13 @@ namespace Web.Controllers
     {
         public IActionResult Index()
         {
-            var user = HttpContext.User?.Claims;
             return View();
         }
 
         [Authorize]
         public IActionResult Privacy()
         {
+            string identity = HttpContext.User.GetUserId();
             return View();
         }
 

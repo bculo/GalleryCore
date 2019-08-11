@@ -13,14 +13,6 @@ namespace Web.Extensions
             return claim?.Value ?? null;
         }
 
-        public static string GetUserEmail(this ClaimsPrincipal principal)
-        {
-            principal.PrincipalValid();
-
-            var claim = principal.FindFirst(ClaimTypes.Email);
-            return claim?.Value ?? null;
-        }
-
         public static string GetUserRole(this ClaimsPrincipal principal)
         {
             principal.PrincipalValid();

@@ -1,4 +1,5 @@
 ﻿using ApplicationCore.Interfaces;
+using AutoMapper;
 using Infrastructure.IdentityData;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -18,18 +19,18 @@ namespace Web.Controllers
         protected readonly IEmailSender mailService;
         protected readonly IUrlGenerator urlService;
         protected readonly ApplicationCore.Interfaces.IAuthenticationService authService;
-        protected readonly SignInManager<GalleryUser> signInManager;
+        protected readonly IMapper mapper;
 
         public AuthenticationController(
             ApplicationCore.Interfaces.IAuthenticationService authService,
             IEmailSender mailService,
             IUrlGenerator urlService,
-            SignInManager<GalleryUser> signInManager)
+            IMapper mapper)
         {
             this.mailService = mailService;
             this.urlService = urlService;
             this.authService = authService;
-            this.signInManager = signInManager;
+            this.mapper = mapper;
         }
 
         [HttpGet]
@@ -165,27 +166,28 @@ namespace Web.Controllers
         public virtual async Task<IActionResult> LogInExternal(string externalAuthScheme)
         {
             var result = await authService.GetAuthProperties(externalAuthScheme, string.Concat("Authentication/", nameof(ExternalLoginCheck)));
-
             if (!result.Success)
             {
                 return RedirectToAction(nameof(Login));
             }
 
-            return new ChallengeResult(externalAuthScheme, result.Result as AuthenticationProperties);
+            var prop = mapper.Map<AuthenticationProperties>(result.Result);
+
+            return new ChallengeResult(externalAuthScheme, prop);
         }
 
         [HttpGet]
         [ValidateUserLogedIn]
-        public async Task<IActionResult> ExternalLoginCheck()
+        public virtual async Task<IActionResult> ExternalLoginCheck()
         {
-            if(await authService.ValidteExternalAuthentication())
+            var result = await authService.ExecuteExternalLogin();
+
+            if (!result)
             {
-                ModelState.AddError("ERROR", "Error with social login");
-                return View();
+                return RedirectToAction(nameof(Login));
             }
 
-
-            return View();
+            return RedirectToAction("Index", "Home");
         }
 
         public override string ToString() => nameof(AuthenticationController);

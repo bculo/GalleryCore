@@ -2,9 +2,9 @@
 
 namespace ApplicationCore.Helpers.Auth
 {
-    public interface IExternalAuthProperties
+    public interface IAuthProperties
     {
-        string RedirectUri { get; set; }
+        string RedirectUri { get; }
         IDictionary<string, string> Items { get; }
     }
 }

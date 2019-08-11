@@ -2,7 +2,7 @@
 using ApplicationCore.Helpers.Auth;
 using ApplicationCore.Helpers.Service;
 using ApplicationCore.Interfaces;
-using Infrastructure.Helpers.AuthProperties;
+using Infrastructure.Helpers.Auth;
 using Infrastructure.Helpers.Http;
 using Infrastructure.IdentityData;
 using Microsoft.AspNetCore.Authentication;
@@ -11,7 +11,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -117,7 +116,8 @@ namespace Infrastructure.Services
         }
 
         /// <summary>
-        /// Register user
+        /// Register user (used for local registration)
+        /// Method calls RegistrationProcess
         /// </summary>
         /// <param name="userName">username</param>
         /// <param name="email">email</param>
@@ -140,6 +140,19 @@ namespace Infrastructure.Services
                 throw new ArgumentNullException(nameof(password));
             }
 
+            var galleryUser = new GalleryUser { Email = email, UserName = userName };
+
+            return await RegistrationProcess(galleryUser, password);
+        }
+
+        /// <summary>
+        /// Registration process for external and local registration
+        /// </summary>
+        /// <param name="user">IUploder instance</param>
+        /// <param name="password">user password</param>
+        /// <returns>Instnace of IUploader</returns>
+        protected virtual async Task<ServiceResult<IUploader>> RegistrationProcess(IUploader user, string password)
+        {
             var resultFactory = new RequestWithResult<IUploader>();
 
             var instance = GetSpecificInstance<AppIdentityDbContext>();
@@ -148,9 +161,7 @@ namespace Infrastructure.Services
                 return resultFactory.FailedRequest("Problem with server, try again later");
             }
 
-            var galleryUser = new GalleryUser { Email = email, UserName = userName };
-
-            await ExecuteRegistrationTransaction(instance, galleryUser, password, resultFactory);
+            await ExecuteRegistrationTransaction(instance, user, password, resultFactory);
 
             return resultFactory.InstanceResult;
         }
@@ -164,14 +175,14 @@ namespace Infrastructure.Services
             RequestWithResult<IUploader> serviceResult)
         {
             IExecutionStrategy databaseStrategy = database.Database.CreateExecutionStrategy();
-
             await databaseStrategy.ExecuteAsync(async () =>
             {
                 using (var transaction = database.Database.BeginTransaction())
                 {
                     try
                     {
-                        var createResult = await userManager.CreateAsync(user as GalleryUser, password); //Add user to identity database
+                        IdentityResult createResult = await userManager.CreateAsync(user as GalleryUser, password);
+      
                         if (!createResult.Succeeded) //Check status of operation
                         {
                             serviceResult.FailedRequest(createResult.Errors.Select(item => item.Description).ToList());
@@ -189,7 +200,7 @@ namespace Infrastructure.Services
                             throw new Exception("Failed to add role to user");
                         }
 
-                        if (!string.IsNullOrEmpty(galleryDatabase.Result.Item2)) //Check status of adding user to gallery database
+                        if (!string.IsNullOrEmpty(galleryDatabase.Result.errorMessage)) //Check status of adding user to gallery database
                         {
                             serviceResult.FailedRequest("Problem with registration");
                             throw new Exception("Failed to add role to user");
@@ -198,8 +209,9 @@ namespace Infrastructure.Services
                         transaction.Commit(); // commit transaction
                         serviceResult.SuccessRequest(user);
                     }
-                    catch
+                    catch(Exception e) //Just for debuging purpose
                     {
+                        transaction?.Rollback();
                         serviceResult.FailedRequest("Problem with registration");
                     }
                 }
@@ -342,7 +354,7 @@ namespace Infrastructure.Services
         /// <param name="provider">name of provider</param>
         /// <param name="redirectUrl">provider should redirect to</param>
         /// <returns>instance of IExternalAuthProperties</returns>
-        public virtual async Task<ServiceResult<IExternalAuthProperties>> GetAuthProperties(string provider, string redirectUrl)
+        public virtual async Task<ServiceResult<IAuthProperties>> GetAuthProperties(string provider, string redirectUrl)
         {
             if (string.IsNullOrEmpty(provider))
             {
@@ -354,7 +366,7 @@ namespace Infrastructure.Services
                 throw new ArgumentNullException(nameof(redirectUrl));
             }
 
-            var result = new RequestWithResult<IExternalAuthProperties>();
+            var result = new RequestWithResult<IAuthProperties>();
 
             var allAuthScheme = (await signInManager.GetExternalAuthenticationSchemesAsync())
                 .Select(item => item.Name)
@@ -362,27 +374,57 @@ namespace Infrastructure.Services
 
             if (!allAuthScheme.Contains(provider))
             {
-                return result.FailedRequest("Requested provider doesnt exist");
+                return result.FailedRequest("Requested provider is not supported");
             }
 
             AuthenticationProperties prop = signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
-            return result.SuccessRequest(new GalleryAuthenticationProperties(prop.Items, prop.RedirectUri));
+
+            return result.SuccessRequest(new ExternalAuthProperties(redirectUrl, prop.Items));
         }
 
         /// <summary>
-        /// Validate social login status
+        /// External login using SignInManager
         /// </summary>
-        /// <returns>true if everything good</returns>
-        protected virtual async Task<Dictionary<string, string>> GetExternalAuthenticationClaims()
+        /// <returns></returns>
+        public virtual async Task<bool> ExecuteExternalLogin()
         {
             var result = await signInManager.GetExternalLoginInfoAsync();
+            
+            if(result == null) // error in authentication
+            {
+                return false;
+            }
 
-            throw new NotImplementedException();
-        }
+            ExternalAuthFactory authFactory = ExternalAuthFactory.GetInstance(result.LoginProvider);
+            if(authFactory != null && !authFactory.CanAuthenticate(result.Principal.Claims))
+            {
+                return false;
+            }
 
-        public Task<bool> ExecuteExternalLogin()
-        {
-            throw new NotImplementedException();
+            IUploader uploader = await GetUserByIdAsync(authFactory.Identifier);
+            if(uploader != null) //User already registered so sign him in
+            {
+                await signInManager.SignInAsync(uploader as GalleryUser, false); // login user
+                return true;
+            }
+
+            string password = Guid.NewGuid().ToString().Substring(0, 8); // password can be random because user will never type in this password
+            var galleryUser = new GalleryUser
+            {
+                Id = authFactory.Identifier,
+                Email = authFactory.Email,
+                UserName = authFactory.UserName,
+                IsExternal = true
+            };
+
+            var resultOfRegistration = await RegistrationProcess(galleryUser, password);
+            if (!resultOfRegistration.Success) // registration unsuccessful
+            {
+                return false;
+            }
+
+            await signInManager.SignInAsync(resultOfRegistration.Result as GalleryUser, false); // login user
+            return true;
         }
     }
 }

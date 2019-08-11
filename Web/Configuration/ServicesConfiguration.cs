@@ -3,6 +3,7 @@ using ApplicationCore.Services;
 using Infrastructure.Data.EntityFramework;
 using Infrastructure.Data.EntityFramework.Repository;
 using Infrastructure.Services;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Web.Interfaces;
 using Web.Services;
@@ -15,7 +16,8 @@ namespace Web.Configuration
         /// Configure dependencies
         /// </summary>
         /// <param name="services">IServiceCollection instance</param>
-        public static void ConfigureServices(this IServiceCollection services)
+        /// <param name="configuration">IConfiguration instance</param>
+        public static void ConfigureServices(this IServiceCollection services, IConfiguration configuration)
         {
             //Core project
             services.AddScoped<ICategoryService, CategoryService>();
@@ -24,7 +26,15 @@ namespace Web.Configuration
             services.AddScoped(typeof(ISpecificationEvaluator<>), typeof(EfSpecificationEvaluator<>));
             services.AddScoped(typeof(IAsyncRepository<>), typeof(EfRepository<>));
             services.AddTransient<IEmailSender, SendGridEmailSender>();
-            services.AddScoped<IAuthenticationService, IdentityAuthenticationService>();
+
+            if (configuration.UsingIdentity())
+            {
+                services.AddScoped<IAuthenticationService, IdentityAuthenticationService>();
+            }
+            else
+            {
+                services.AddScoped<IAuthenticationService, HttpContextAuthenticationService>();
+            }
 
             //Web project
             services.AddScoped<IUrlGenerator, UrlGenerator>();
