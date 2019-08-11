@@ -17,6 +17,7 @@
     <Compile Remove="Migrations\20190719173259_new update of database 19.8.cs" />
     <Compile Remove="Migrations\20190719180127_initial migration.cs" />
     <Compile Remove="Migrations\20190728105205_Initial migration.cs" />
+    <Compile Remove="Migrations\CustomIdentityDb\20190811182758_Custom identity integration.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -66,7 +67,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="CustomIdentity\" />
     <Folder Include="Helpers\AuthProperties\" />
   </ItemGroup>
 

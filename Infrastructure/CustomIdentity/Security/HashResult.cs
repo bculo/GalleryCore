@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ApplicationCore.Helpers.Security
+namespace Infrastructure.CustomIdentity.Security
 {
     public sealed class HashResult
     {
@@ -10,14 +10,14 @@ namespace ApplicationCore.Helpers.Security
 
         public static explicit operator HashResult(string result)
         {
-            if(result == null)
+            if (result == null)
             {
                 throw new ArgumentNullException(nameof(result));
             }
 
             string[] parts = result.Split(".");
 
-            if(parts.Length != 3)
+            if (parts.Length != 3)
             {
                 throw new FormatException("Wrong format");
             }

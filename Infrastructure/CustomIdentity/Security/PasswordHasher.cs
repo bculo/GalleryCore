@@ -1,24 +1,26 @@
 ﻿using ApplicationCore.Helpers.Security;
 using Microsoft.Extensions.Options;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 
-namespace Infrastructure.Helpers.Security
+namespace Infrastructure.CustomIdentity.Security
 {
     /// <summary>
     /// Uses Rfc2898DeriveBytes with SHA256
     /// Working with format {iterations}.{salt}.{key}
     /// </summary>
-    public class Rfc2898PasswordHasher : IHasher
+    public class PasswordHasher
     {
         private HashOptions Options { get; }
 
         private int SaltSize { get; } = 16; // 128 bit 
         private int KeySize { get; } = 32; // 256 bit
 
-        public Rfc2898PasswordHasher(IOptions<HashOptions> options)
+        public PasswordHasher(IOptions<HashOptions> options)
         {
             Options = options.Value;
         }

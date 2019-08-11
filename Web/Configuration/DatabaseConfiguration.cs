@@ -1,4 +1,5 @@
-﻿using Infrastructure.Data.EntityFramework;
+﻿using Infrastructure.CustomIdentity.EntityFramework;
+using Infrastructure.Data.EntityFramework;
 using Infrastructure.IdentityData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -34,6 +35,18 @@ namespace Web.Configuration
             //Identity database
             services.AddDbContext<AppIdentityDbContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("IdentityConnection"),
+                sqlServerOptionsAction: sqlOptions =>
+                {
+                    sqlOptions.EnableRetryOnFailure(
+                        maxRetryCount: settings.MaxRetryCount,
+                        maxRetryDelay: TimeSpan.FromSeconds(settings.MaxRetryDelay),
+                        errorNumbersToAdd: settings.ErrorNumbersToAdd);
+                })
+            );
+
+            //Custom identity database
+            services.AddDbContext<CustomIdentityDbContext>(options =>
+                options.UseSqlServer(configuration.GetConnectionString("CustomIdentityConnection"),
                 sqlServerOptionsAction: sqlOptions =>
                 {
                     sqlOptions.EnableRetryOnFailure(

@@ -1,13 +1,12 @@
 ﻿using ApplicationCore.Entities;
 using ApplicationCore.Helpers.Auth;
-using ApplicationCore.Helpers.Generator;
-using ApplicationCore.Helpers.Security;
 using ApplicationCore.Helpers.Service;
 using ApplicationCore.Interfaces;
 using Infrastructure.Helpers.Auth;
 using Infrastructure.Helpers.Claim;
 using Infrastructure.Helpers.Http;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
@@ -22,13 +21,9 @@ namespace Infrastructure.Services
     /// </summary>
     public class HttpContextAuthenticationService : HttpAccess, ApplicationCore.Interfaces.IAuthenticationService
     {
-        //TODO
-        //REMOVE IHasher and IUniqueStringGenerator in customIdentityFolder
-
         protected readonly IAsyncRepository<Uploader> repository;
-        protected readonly IUniqueStringGenerator generator; //move
-        protected readonly IHasher hasher; //move
         protected readonly IAuthenticationSchemeProvider schemeProvider;
+        protected readonly IDataProtectionProvider dataProtection;
 
         private IClaimMaker maker;
 
@@ -48,14 +43,12 @@ namespace Infrastructure.Services
         public HttpContextAuthenticationService(
             IAsyncRepository<Uploader> repository,
             IHttpContextAccessor accessor,
-            IUniqueStringGenerator generator, //move
-            IHasher hasher, //move
-            IAuthenticationSchemeProvider schemeProvider) : base(accessor)
+            IAuthenticationSchemeProvider schemeProvider,
+            IDataProtectionProvider dataProtection) : base(accessor)
         {
             this.repository = repository;
-            this.generator = generator;
-            this.hasher = hasher;
             this.schemeProvider = schemeProvider;
+            this.dataProtection = dataProtection;
         }
 
         public virtual Task<string> CreateConfirmationTokenAsync(IUploader uploader)
@@ -151,14 +144,24 @@ namespace Infrastructure.Services
 
         public virtual async Task<bool> ExecuteExternalLogin()
         {
+            IDataProtector protector = dataProtection.CreateProtector("TEST");
+
+            string protectedText = protector.Protect("hello");
+
+            string unProtectedText = protector.Unprotect(protectedText);
+
+
+
+            /*
             var result = await Http.AuthenticateAsync("ExternalLogin");
 
             if (!result.Succeeded)
             {
                 return false;
             }
+            */
 
-            throw new NotImplementedException();
+            return true;
         }
     }
 }

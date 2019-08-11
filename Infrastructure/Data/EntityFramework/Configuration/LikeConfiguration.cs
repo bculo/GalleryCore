@@ -24,7 +24,7 @@ namespace Infrastructure.Data.EntityFramework.Configurations
                 .WithMany(user => user.LikedImages)
                 .HasForeignKey(item => item.UserId)
                 .IsRequired()
-                .OnDelete(DeleteBehavior.Restrict); ;
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.Property(item => item.Created)
                 .IsRequired();

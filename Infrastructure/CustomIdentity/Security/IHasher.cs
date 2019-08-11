@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace ApplicationCore.Helpers.Security
+namespace Infrastructure.CustomIdentity.Security
 {
     public interface IHasher
     {
