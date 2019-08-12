@@ -1,28 +1,21 @@
-﻿using ApplicationCore.Entities;
-using ApplicationCore.Interfaces;
-using Infrastructure.IdentityData;
+﻿using Infrastructure.CustomIdentity.EntityFramework;
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 
-namespace Infrastructure.Helpers.Claim
+namespace Infrastructure.CustomIdentity.Claim
 {
-    public class ClaimsMaker : IClaimMaker
+    public class ClaimMaker : IClaimMaker
     {
         protected ClaimsHolder Holder { get; }
 
-        public ClaimsMaker() => Holder = new ClaimsHolder();
+        public ClaimMaker() => Holder = new ClaimsHolder();
 
-        public virtual ClaimsHolder SetClaims(IUploader user, IDomainModel<Role> role, string authenticaitonName)
+        public virtual ClaimsHolder SetClaims(AppUser user, string authenticaitonName)
         {
             if (user == null)
             {
                 throw new ArgumentNullException(nameof(user));
-            }
-
-            if (role == null)
-            {
-                throw new ArgumentNullException(nameof(role));
             }
 
             if (string.IsNullOrEmpty(authenticaitonName))
@@ -30,22 +23,21 @@ namespace Infrastructure.Helpers.Claim
                 throw new ArgumentNullException(nameof(authenticaitonName));
             }
 
-            SetClaims(user, role);
+            Holder.AuthName = authenticaitonName;
+            Holder.Uploder = user;
+            SetClaims(user);
             CreateClaimIdentity(authenticaitonName);
             CreateClaimPrincipal();
             return Holder;
         }
 
-        protected virtual void SetClaims(IUploader user, IDomainModel<Role> role)
+        protected virtual void SetClaims(AppUser user)
         {
-            GalleryUser userGallery = user as GalleryUser;
-            Role userRole = role.ToDomainModel();
-
             Holder.Claims = new List<System.Security.Claims.Claim>
             {
-                new System.Security.Claims.Claim(ClaimTypes.NameIdentifier, userGallery.Id.ToString()),
-                new System.Security.Claims.Claim(ClaimTypes.Name, userGallery.UserName),
-                new System.Security.Claims.Claim(ClaimTypes.Role, userRole.Name),
+                new System.Security.Claims.Claim(ClaimTypes.NameIdentifier, user.Id),
+                new System.Security.Claims.Claim(ClaimTypes.Name, user.UserName),
+                new System.Security.Claims.Claim(ClaimTypes.Role, user.AppRole.Name),
             };
         }
 

@@ -2,6 +2,9 @@
 
 namespace Infrastructure.CustomIdentity.Security
 {
+    /// <summary>
+    /// Hashed password helper
+    /// </summary>
     public sealed class HashResult
     {
         public string HashedContent { get; private set; }

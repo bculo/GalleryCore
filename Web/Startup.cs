@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Infrastructure.CustomIdentity.Extensions;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -25,7 +26,8 @@ namespace Web
             services.ConfigureServices(Configuration);
             services.ConfigureAutoMapper();
 
-            services.AddDataProtection();
+            services.AddCustomIdentity(); //CustomIDentity folder in Infrastracture
+
             services.AddHttpContextAccessor();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);

@@ -1,9 +1,6 @@
 ﻿using ApplicationCore.Interfaces;
 using AutoMapper;
-using Infrastructure.IdentityData;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using Web.Extensions;

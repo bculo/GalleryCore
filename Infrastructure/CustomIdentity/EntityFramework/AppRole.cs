@@ -4,8 +4,9 @@ using System.Collections.Generic;
 
 namespace Infrastructure.CustomIdentity.EntityFramework
 {
-    public class AppRole : BaseEntity<int>, IDomainModel<Role>
+    public class AppRole : IDomainModel<Role>
     {
+        public int Id { get; set; }
         public string Name { get; set; }
 
         public ICollection<AppUser> Users { get; set; }

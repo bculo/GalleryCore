@@ -2,11 +2,11 @@
 using ApplicationCore.Helpers.Auth;
 using ApplicationCore.Helpers.Service;
 using ApplicationCore.Interfaces;
+using Infrastructure.CustomIdentity.EntityFramework;
+using Infrastructure.CustomIdentity.Interfaces;
 using Infrastructure.Helpers.Auth;
-using Infrastructure.Helpers.Claim;
 using Infrastructure.Helpers.Http;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
@@ -23,67 +23,183 @@ namespace Infrastructure.Services
     {
         protected readonly IAsyncRepository<Uploader> repository;
         protected readonly IAuthenticationSchemeProvider schemeProvider;
-        protected readonly IDataProtectionProvider dataProtection;
-
-        private IClaimMaker maker;
-
-        protected IClaimMaker Maker
-        {
-            get
-            {
-                if(maker == null)
-                {
-                    maker = new ClaimsMaker();
-                }
-
-                return maker;
-            }
-        }
+        protected readonly IUserManager manager;
 
         public HttpContextAuthenticationService(
             IAsyncRepository<Uploader> repository,
             IHttpContextAccessor accessor,
             IAuthenticationSchemeProvider schemeProvider,
-            IDataProtectionProvider dataProtection) : base(accessor)
+            IUserManager manager) : base(accessor)
         {
             this.repository = repository;
             this.schemeProvider = schemeProvider;
-            this.dataProtection = dataProtection;
+            this.manager = manager;
         }
 
+        /// <summary>
+        /// Create confirmationToken
+        /// </summary>
+        /// <param name="uploader"></param>
+        /// <returns></returns>
         public virtual Task<string> CreateConfirmationTokenAsync(IUploader uploader)
         {
-            throw new NotImplementedException();
+            if(uploader == null)
+            {
+                throw new ArgumentNullException(nameof(uploader));
+            }
+
+            return Task.FromResult(manager.CreateConfirmationToken(uploader as AppUser));
         }
 
+        /// <summary>
+        /// Verify confirmation token
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        public virtual async Task<ServiceNoResult> VerifyConfirmationTokenAsync(string userId, string token)
+        {
+            if (string.IsNullOrEmpty(userId))
+            {
+                throw new ArgumentNullException(nameof(userId));
+            }
+
+            if (string.IsNullOrEmpty(token))
+            {
+                throw new ArgumentNullException(nameof(token));
+            }
+
+            var result = new RequestNoResult();
+
+            var confirmationResult = await manager.VerifyConifrmationTokenAsync(userId, token);
+
+            if (confirmationResult)
+            {
+                return result.SuccessRequest();
+            }
+            else
+            {
+                return result.FailedRequest("Token confirmation failed");
+            }
+        }
+
+        /// <summary>
+        /// Create password recovery token
+        /// </summary>
+        /// <param name="uploader"></param>
+        /// <returns></returns>
         public virtual Task<string> CreatePasswordRecoveryTokenAsync(IUploader uploader)
         {
-            throw new NotImplementedException();
+            if (uploader == null)
+            {
+                throw new ArgumentNullException(nameof(uploader));
+            }
+
+            return Task.FromResult(manager.CreatePasswordRecoveryToken(uploader as AppUser));
         }
 
-        public virtual Task<IUploader> GetUserByIdAsync(string userId)
+        /// <summary>
+        /// Get user by id
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public virtual async Task<IUploader> GetUserByIdAsync(string userId)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(userId))
+            {
+                throw new ArgumentNullException(nameof(userId));
+            }
+
+            return await manager.GetUserByIdAsync(userId);
         }
 
-        public virtual Task<IUploader> GetUserByMailAsync(string email)
+        /// <summary>
+        /// Get user by email
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        public virtual async Task<IUploader> GetUserByMailAsync(string email)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(email))
+            {
+                throw new ArgumentNullException(nameof(email));
+            }
+
+            return await manager.GetUserByEmailAsync(email);
         }
 
-        public virtual Task<IUploader> GetUserByUserNameAsync(string userName)
+        /// <summary>
+        /// Get user by username
+        /// </summary>
+        /// <param name="userName"></param>
+        /// <returns></returns>
+        public virtual async Task<IUploader> GetUserByUserNameAsync(string userName)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(userName))
+            {
+                throw new ArgumentNullException(nameof(userName));
+            }
+
+            return await manager.GetUserByNameAsync(userName);
         }
 
-        public virtual Task<ServiceResult<IUploader>> RegisterUserAsync(string userName, string email, string password)
+        /// <summary>
+        /// Register new user
+        /// </summary>
+        /// <param name="userName"></param>
+        /// <param name="email"></param>
+        /// <param name="password"></param>
+        /// <returns></returns>
+        public virtual async Task<ServiceResult<IUploader>> RegisterUserAsync(string userName, string email, string password)
         {
-            throw new NotImplementedException();
+            var instance = new RequestWithResult<IUploader>();
+
+            var user = new AppUser
+            {
+                Email = email,
+                UserName = userName,
+            };
+
+            var serviceResult = new RequestWithResult<IUploader>();
+
+            var createResult = await manager.CreateUserAsync(user, password);
+            if(createResult != null)
+            {
+                return serviceResult.SuccessRequest(createResult);
+            }
+
+            return serviceResult.FailedRequest("Error");
         }
 
-        public virtual Task<ServiceResult<IUploader>> SignInUserAsync(string userIdentification, string password)
+        /// <summary>
+        /// Sign in user using HtppContext and method SignInAsync
+        /// </summary>
+        /// <param name="userIdentification"></param>
+        /// <param name="password"></param>
+        /// <returns></returns>
+        public virtual async Task<ServiceResult<IUploader>> SignInUserAsync(string userIdentification, string password)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(userIdentification))
+            {
+                throw new ArgumentNullException(nameof(userIdentification));
+            }
+
+            if (string.IsNullOrEmpty(password))
+            {
+                throw new ArgumentNullException(nameof(password));
+            }
+
+            var serviceResult = new RequestWithResult<IUploader>();
+
+            var claimHolder = await manager.CanSignInAsync(userIdentification, password);
+            if(claimHolder == null)
+            {
+                serviceResult.FailedRequest("Wrong credentials");
+            }
+
+            await Http.SignInAsync(claimHolder.AuthName, claimHolder.ClaimsPrincipal);
+
+            return serviceResult.SuccessRequest(claimHolder.Uploder);
         }
 
         /// <summary>
@@ -95,14 +211,40 @@ namespace Infrastructure.Services
             await Http.SignOutAsync();
         }
 
-        public virtual Task<ServiceNoResult> VerifyConfirmationTokenAsync(string userId, string token)
+        /// <summary>
+        /// Verify password recovery token
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="token"></param>
+        /// <param name="newPassword"></param>
+        /// <returns></returns>
+        public virtual async Task<ServiceNoResult> VerifyPasswordRecoveryTokenAsync(string userId, string token, string newPassword)
         {
-            throw new NotImplementedException();
-        }
+            if (string.IsNullOrEmpty(userId))
+            {
+                throw new ArgumentNullException(nameof(userId));
+            }
 
-        public virtual Task<ServiceNoResult> VerifyPasswordRecoveryTokenAsync(string userId, string token, string newPassword)
-        {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(token))
+            {
+                throw new ArgumentNullException(nameof(token));
+            }
+
+            if (string.IsNullOrEmpty(newPassword))
+            {
+                throw new ArgumentNullException(nameof(newPassword));
+            }
+
+            var resultFactory = new RequestNoResult();
+
+            bool success = await manager.VerifyPasswordRecoveryTokenAsync(userId, token, newPassword);
+
+            if (success)
+            {
+                resultFactory.FailedRequest("Password recovery failed");
+            }
+
+            return resultFactory.SuccessRequest();
         }
 
         /// <summary>
@@ -144,24 +286,16 @@ namespace Infrastructure.Services
 
         public virtual async Task<bool> ExecuteExternalLogin()
         {
-            IDataProtector protector = dataProtection.CreateProtector("TEST");
-
-            string protectedText = protector.Protect("hello");
-
-            string unProtectedText = protector.Unprotect(protectedText);
-
-
-
-            /*
             var result = await Http.AuthenticateAsync("ExternalLogin");
 
             if (!result.Succeeded)
             {
                 return false;
             }
-            */
 
-            return true;
+            //TODO
+
+            throw new NotImplementedException();
         }
     }
 }

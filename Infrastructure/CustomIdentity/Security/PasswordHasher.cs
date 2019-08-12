@@ -1,10 +1,7 @@
-﻿using ApplicationCore.Helpers.Security;
-using Microsoft.Extensions.Options;
+﻿using Infrastructure.CustomIdentity.Interfaces;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Infrastructure.CustomIdentity.Security
@@ -13,19 +10,19 @@ namespace Infrastructure.CustomIdentity.Security
     /// Uses Rfc2898DeriveBytes with SHA256
     /// Working with format {iterations}.{salt}.{key}
     /// </summary>
-    public class PasswordHasher
+    public class PasswordHasher : IHasher
     {
-        private HashOptions Options { get; }
-
+        private int Iterations { get; } = 1000;
         private int SaltSize { get; } = 16; // 128 bit 
         private int KeySize { get; } = 32; // 256 bit
 
-        public PasswordHasher(IOptions<HashOptions> options)
-        {
-            Options = options.Value;
-        }
-
-        public virtual async Task<(bool Verified, bool NeedsUpgrade)> CheckHash(string hashedContent, string content)
+        /// <summary>
+        /// Verify hashed content
+        /// </summary>
+        /// <param name="hashedContent">Hashed content</param>
+        /// <param name="unhashedContent">Unhashed contetn</param>
+        /// <returns>true if they match</returns>
+        public virtual async Task<(bool Verified, bool NeedsUpgrade)> CheckHash(string hashedContent, string unhashedContent)
         {
             var result = await Task.Run(() =>
             {
@@ -40,10 +37,10 @@ namespace Infrastructure.CustomIdentity.Security
                 var salt = Convert.FromBase64String(parts[1]);
                 var key = Convert.FromBase64String(parts[2]);
 
-                bool needsUpgrade = iterations != Options.Iterations;
+                bool needsUpgrade = iterations != Iterations;
 
                 using (var algorithm = new Rfc2898DeriveBytes(
-                  content,
+                  unhashedContent,
                   salt,
                   iterations,
                   HashAlgorithmName.SHA256))
@@ -59,6 +56,11 @@ namespace Infrastructure.CustomIdentity.Security
             return result;
         }
 
+        /// <summary>
+        /// Hash content
+        /// </summary>
+        /// <param name="content">content to hash</param>
+        /// <returns>hashed content</returns>
         public virtual async Task<string> Hash(string content)
         {
             string result = await Task.Run(() =>
@@ -66,13 +68,13 @@ namespace Infrastructure.CustomIdentity.Security
                 using (var algorithm = new Rfc2898DeriveBytes(
                   content,
                   SaltSize,
-                  Options.Iterations,
+                  Iterations,
                   HashAlgorithmName.SHA256))
                 {
                     string key = Convert.ToBase64String(algorithm.GetBytes(KeySize));
                     string salt = Convert.ToBase64String(algorithm.Salt);
 
-                    return $"{Options.Iterations}.{salt}.{key}";
+                    return $"{Iterations}.{salt}.{key}";
                 }
             });
 
