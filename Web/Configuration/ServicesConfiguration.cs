@@ -1,4 +1,5 @@
-﻿using ApplicationCore.Interfaces;
+﻿using ApplicationCore.Helpers.Pagination;
+using ApplicationCore.Interfaces;
 using ApplicationCore.Services;
 using Infrastructure.Data.EntityFramework;
 using Infrastructure.Data.EntityFramework.Repository;
@@ -21,6 +22,9 @@ namespace Web.Configuration
         {
             //Core project
             services.AddScoped<ICategoryService, CategoryService>();
+            services.AddScoped(typeof(IPaginationMaker<>), typeof(PaginationMaker<>));
+            services.AddScoped(typeof(IPaginationModel<>), typeof(PaginationModel<>));
+            services.AddTransient<IPaginationChecker, PaginationChecker>();
 
             //Infrastracture project
             services.AddScoped(typeof(ISpecificationEvaluator<>), typeof(EfSpecificationEvaluator<>));

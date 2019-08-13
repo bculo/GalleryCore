@@ -7,7 +7,27 @@
 <h1>Categories</h1>
 
 <div>
+    <p>Current page: @Model.Pagination.CurrentPage</p>
+    <p>Total records: @Model.Pagination.NumberOfItems</p>
+    <p>Total pages: @Model.Pagination.LastPage</p>
+
+    <form method="get" asp-action="Index">
+
+        <input name="searchQuery" value="@Model.SearchCategory" />
+
+        @foreach (var item in Model.Pagination.Pages)
+        {
+            <input name="page" type="submit" value="@item" />
+        }
+    </form>
 
 
+        @foreach (var item in @Model.Pagination.ResultsSet)
+        {
+            <p>@item.Name</p>
+            <p>@item.Name</p>
 
-</div>
+            <hr />
+        }
+
+    </div>

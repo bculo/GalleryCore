@@ -1,5 +1,6 @@
 ﻿using ApplicationCore.Entities;
 using ApplicationCore.Helpers.Auth;
+using ApplicationCore.Interfaces;
 using AutoMapper;
 using Infrastructure.IdentityData;
 using Microsoft.AspNetCore.Authentication;

@@ -1,7 +1,7 @@
 ﻿using ApplicationCore.Entities;
+using ApplicationCore.Helpers.Pagination;
 using ApplicationCore.Interfaces;
 using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -13,35 +13,30 @@ namespace Web.Controllers
     {
         private readonly IMapper mapper;
         private readonly ICategoryService service;
+        private readonly IPaginationMaker<CategoryModel> maker;
 
-        public CategoryController(ICategoryService service, IMapper mapper)
+        public CategoryController(ICategoryService service, IMapper mapper, IPaginationMaker<CategoryModel> maker)
         {
             this.mapper = mapper;
             this.service = service;
+            this.maker = maker;
         }
 
-        //[Authorize]
-        public async Task<IActionResult> Index()
+        [HttpGet]
+        public virtual async Task<IActionResult> Index(int? page, string searchQuery)
         {
-            return View(CreateCategoryViewModel(await service.GetAllAsync()));
+            //Get pagination result for categories based on choosen page and search query
+            PaginationResult<Category> serviceResult = await service.GetCategories(page, searchQuery);
+
+            // Convert List<Category> to List<CategoryModel>
+            var categoryModels = mapper.Map<List<CategoryModel>>(serviceResult.ResultSet);
+
+            //Create pagination model
+            IPaginationModel<CategoryModel> pagination = maker.FillPaginationModel(categoryModels, serviceResult.Options);
+
+            //Display CategoryViewModel
+            return View(new CategoryViewModel { SearchCategory = searchQuery ?? "", Pagination = pagination });
         }
 
-        //[Authorize]
-        public async Task<IActionResult> QueryResult(string query)
-        {
-            var categoryViewModel = CreateCategoryViewModel(await service.GetAllWithAsync(query ?? ""), query);
-            return View("Index", new { instance = categoryViewModel });
-        }
-
-        protected CategoryViewModel CreateCategoryViewModel(List<Category> categories, string query = "")
-        {
-            var categoryModels = mapper.Map<List<CategoryModel>>(categories ?? new List<Category>());
-            var categoryViewModel = new CategoryViewModel
-            {
-                SearchCategory = query,
-                Categories = categoryModels
-            };
-            return categoryViewModel;
-        }
     }
 }
