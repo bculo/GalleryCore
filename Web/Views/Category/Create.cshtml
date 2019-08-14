@@ -30,34 +30,15 @@
 @section Scripts{ 
     @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
     <script src="~/js/file-upload.js" type="text/javascript"></script>
-
+    <script src="~/js/category-create.js" type="text/javascript"></script>
     <script>
-        var upload = new FileUpload();
-
-        window.onload = function() {
-            upload.setUploadUrl('@Url.Action("CreateAjax", "Category")');
-
-            let token = $('input[name="__RequestVerificationToken"]').val();
-            upload.setForgeryToken("__RequestVerificationToken", token);
-
-            $("#submitForm").click(submitFile);
+        var settings =
+        {
+            uploadUrl: '@Url.Action("CreateAjax", "Category")',
+            nameInputId: '@nameof(Model.Name)',
+            categoryImageInputId: '@nameof(Model.CategoryImage)'
         }
-
-        function submitFile(e) {
-            e.preventDefault(); //prevent submit
-
-            let file = $("#@nameof(Model.CategoryImage)").prop('files')[0]; // Get category image
-            let name = $("#@nameof(Model.Name)").val(); // Get category name
-
-            if (!name || !file) {
-                console.log("Something aint riht");
-                return;
-            }
-
-            upload.addItem("@nameof(Model.Name)", name);
-            upload.setFile("@nameof(Model.CategoryImage)", file);
-            upload.uploadForm();
-        }
+        my.viewname.init(settings);
     </script>
 }
 
