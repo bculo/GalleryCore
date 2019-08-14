@@ -1,6 +1,5 @@
 ﻿using ApplicationCore.Helpers.Service;
 using Infrastructure.CustomIdentity.Claim;
-using Infrastructure.CustomIdentity.Interfaces;
 using Infrastructure.CustomIdentity.Security;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
@@ -128,7 +127,7 @@ namespace Infrastructure.CustomIdentity.EntityFramework
                 throw new ArgumentNullException(nameof(user));
             }
 
-            IDataProtector protector = protectionProvider.CreateProtector(ProtectorPurpse.MailConfirmation);
+            IDataProtector protector = protectionProvider.CreateProtector(ProtectorPurpse.PasswordRecovery);
 
             var ms = new MemoryStream();
             using (var writer = new StreamWriter(ms))
@@ -162,7 +161,7 @@ namespace Infrastructure.CustomIdentity.EntityFramework
                     return false;
                 }
 
-                IDataProtector protector = protectionProvider.CreateProtector(ProtectorPurpse.MailConfirmation); //Create protector
+                IDataProtector protector = protectionProvider.CreateProtector(ProtectorPurpse.PasswordRecovery); //Create protector
                 byte[] unprotectedData = protector.Unprotect(Convert.FromBase64String(token)); //Unprotect data
 
                 var ms = new MemoryStream(unprotectedData);

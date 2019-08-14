@@ -10,12 +10,12 @@ namespace ApplicationCore.Helpers.Pagination
     {
         IPaginationModel<Data> Pagination { get; }
 
-        IPaginationModel<Data> FillPaginationModel(
+        IPaginationModel<Data> PreparePaginationModel(
              IEnumerable<Data> data,
              PaginationOptions options,
              int pageButtonsToShow = 5);
 
-        IPaginationModel<Data> FillPaginationModel(
+        IPaginationModel<Data> PreparePaginationModel(
             PaginationResult<Data> paginationResult,
             int pageButtonsToShow = 5);
     }

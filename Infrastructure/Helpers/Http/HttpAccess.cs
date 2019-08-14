@@ -16,7 +16,7 @@ namespace Infrastructure.Helpers.Http
             this.accessor = accessor;
         }
 
-        protected T GetSpecificInstance<T>() where T : class
+        protected T GetSpecificServiceInstance<T>() where T : class
         {
             var instance = Http.RequestServices.GetService(typeof(T));
             return instance as T;

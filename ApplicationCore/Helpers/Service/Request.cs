@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace ApplicationCore.Helpers.Service
 {
-    public abstract class Request<Type>
+    public abstract class Request<T> where T : IServiceResult, new()
     {
-        public Type InstanceResult { get; set; }
+        public T InstanceResult { get; set; }
 
         public bool IsSet
         {
@@ -43,6 +43,13 @@ namespace ApplicationCore.Helpers.Service
             }
         }
 
-        protected abstract void CreateInstance(bool success);
+        protected virtual void CreateInstance(bool success)
+        {
+            InstanceResult = new T
+            {
+                Success = success ? true : false,
+                Errors = new List<ErrorMessage>()
+            };
+        }
     }
 }

@@ -1,22 +1,11 @@
 ﻿using ApplicationCore.Entities;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace ApplicationCore.Helpers.Service
 {
     public class RequestWithResult<T> : Request<ServiceResult<T>>
     {
-        protected override void CreateInstance(bool success)
-        {
-            InstanceResult = new ServiceResult<T>
-            {
-                Success = success ? true : false,
-                Errors = new List<ErrorMessage>()
-            };
-        }
-
         public ServiceResult<T> FailedRequest(List<string> errors)
         {
             CreateInstance(false);

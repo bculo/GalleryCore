@@ -2,9 +2,11 @@
 using ApplicationCore.Helpers.Pagination;
 using ApplicationCore.Interfaces;
 using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Web.Filters;
 using Web.Models.Category;
 
 namespace Web.Controllers
@@ -28,14 +30,38 @@ namespace Web.Controllers
             //Get pagination result for categories based on choosen page and search query
             PaginationResult<Category> serviceResult = await service.GetCategories(page, searchQuery);
 
-            // Convert List<Category> to List<CategoryModel>
+            // From List<Category> to List<CategoryModel>
             var categoryModels = mapper.Map<List<CategoryModel>>(serviceResult.ResultSet);
 
-            //Create pagination model
-            IPaginationModel<CategoryModel> pagination = maker.FillPaginationModel(categoryModels, serviceResult.Options);
+            //Prepare pagination model
+            IPaginationModel<CategoryModel> pagination = maker.PreparePaginationModel(categoryModels, serviceResult.Options);
 
             //Display CategoryViewModel
             return View(new CategoryViewModel { SearchCategory = searchQuery ?? "", Pagination = pagination });
+        }
+
+        //Only Moderator and Administrator roles
+        [HttpGet]
+        public virtual IActionResult Create() => View();
+
+        [HttpPost]
+        [ValidateModel]
+        [ValidateAntiForgeryToken]
+        public virtual async Task<IActionResult> Create(CreateCategoryModel model)
+        {
+            //LOGIC HERE
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateModel]
+        [ValidateAntiForgeryToken]
+        public virtual IActionResult CreateAjax([FromForm] CreateCategoryModel model)
+        {
+            //LOGIC HERE
+
+            return Json(new { success = true });
         }
 
     }

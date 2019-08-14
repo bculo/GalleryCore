@@ -38,7 +38,7 @@ namespace ApplicationCore.Helpers.Pagination
         /// </summary>
         /// <param name="paginationResult"></param>
         /// <returns></returns>
-        public virtual IPaginationModel<T> FillPaginationModel(PaginationResult<T> paginationResult, int pageButtonsToShow = 5)
+        public virtual IPaginationModel<T> PreparePaginationModel(PaginationResult<T> paginationResult, int pageButtonsToShow = 5)
         {
             PaginationOptions options = paginationResult.Options;
 
@@ -56,7 +56,7 @@ namespace ApplicationCore.Helpers.Pagination
         /// <param name="data">Data to show</param>
         /// <param name="paginationResult">Instance of pagination result</param>
         /// <returns></returns>
-        public IPaginationModel<T> FillPaginationModel(IEnumerable<T> data, PaginationOptions options, int pageButtonsToShow = 5)
+        public IPaginationModel<T> PreparePaginationModel(IEnumerable<T> data, PaginationOptions options, int pageButtonsToShow = 5)
         {
             SetCommonValues(data, options.CurrentPage, options.NumberOfItems, options.PageSize, pageButtonsToShow);
 

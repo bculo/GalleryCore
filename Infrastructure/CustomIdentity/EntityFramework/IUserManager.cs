@@ -1,8 +1,7 @@
 ﻿using Infrastructure.CustomIdentity.Claim;
-using Infrastructure.CustomIdentity.EntityFramework;
 using System.Threading.Tasks;
 
-namespace Infrastructure.CustomIdentity.Interfaces
+namespace Infrastructure.CustomIdentity.EntityFramework
 {
     public interface IUserManager
     {

@@ -155,7 +155,7 @@ namespace Infrastructure.Services
         {
             var resultFactory = new RequestWithResult<IUploader>();
 
-            var instance = GetSpecificInstance<AppIdentityDbContext>();
+            var instance = GetSpecificServiceInstance<AppIdentityDbContext>();
             if (instance == null)
             {
                 return resultFactory.FailedRequest("Problem with server, try again later");

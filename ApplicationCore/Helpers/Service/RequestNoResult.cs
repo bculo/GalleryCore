@@ -1,20 +1,10 @@
-﻿using ApplicationCore.Entities;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace ApplicationCore.Helpers.Service
 {
     public class RequestNoResult : Request<ServiceNoResult>
     {
-        protected override void CreateInstance(bool success)
-        {
-            InstanceResult = new ServiceNoResult()
-            {
-                Success = success ? true : false,
-                Errors = new List<ErrorMessage>()
-            };
-        }
-
         public ServiceNoResult FailedRequest(List<string> errors)
         {
             CreateInstance(false);

@@ -1,4 +1,4 @@
-﻿using System;
+﻿using ApplicationCore.Exceptions;
 using System.Security.Claims;
 
 namespace Web.Extensions
@@ -7,26 +7,26 @@ namespace Web.Extensions
     {
         public static string GetUserId(this ClaimsPrincipal principal)
         {
-            principal.PrincipalValid();
-
             var claim = principal.FindFirst(ClaimTypes.NameIdentifier);
-            return claim?.Value ?? null;
+
+            if(claim.Value == null)
+            {
+                throw new InvalidUserException();
+            }
+
+            return claim.Value;
         }
 
         public static string GetUserRole(this ClaimsPrincipal principal)
         {
-            principal.PrincipalValid();
-
             var claim = principal.FindFirst(ClaimTypes.Role);
-            return claim?.Value ?? null;
-        }
 
-        private static void PrincipalValid(this ClaimsPrincipal principal)
-        {
-            if(principal == null)
+            if (claim.Value == null)
             {
-                throw new ArgumentNullException(nameof(principal));
+                throw new InvalidUserException();
             }
+
+            return claim.Value;
         }
     }
 }

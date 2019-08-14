@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using ApplicationCore.Exceptions;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Routing;
 using System;
@@ -12,12 +13,21 @@ namespace Web.Filters
         {
             if (context.Exception is ArgumentNullException)
             {
-                context.Result = new RedirectToRouteResult(
-                    new RouteValueDictionary(new { controller = "Error", action = "AppBadRequest" })
-                );
+                RedirectOnException(context.Result, "Error", "AppBadRequest");
+            }
+            else if(context.Exception is InvalidUserException)
+            {
+                RedirectOnException(context.Result, "Authentication", "Login");
             }
 
             base.OnException(context);
+        }
+
+        private void RedirectOnException(IActionResult result, string controllerName, string actionName)
+        {
+            result = new RedirectToRouteResult(
+                new RouteValueDictionary(new { controller = "Error", action = "AppBadRequest" })
+            );
         }
     }
 }

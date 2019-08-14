@@ -1,6 +1,5 @@
 ﻿using Infrastructure.CustomIdentity.Claim;
 using Infrastructure.CustomIdentity.EntityFramework;
-using Infrastructure.CustomIdentity.Interfaces;
 using Infrastructure.CustomIdentity.Security;
 using Microsoft.Extensions.DependencyInjection;
 

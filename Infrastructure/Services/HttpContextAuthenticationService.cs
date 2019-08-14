@@ -3,7 +3,6 @@ using ApplicationCore.Helpers.Auth;
 using ApplicationCore.Helpers.Service;
 using ApplicationCore.Interfaces;
 using Infrastructure.CustomIdentity.EntityFramework;
-using Infrastructure.CustomIdentity.Interfaces;
 using Infrastructure.Helpers.Auth;
 using Infrastructure.Helpers.Http;
 using Microsoft.AspNetCore.Authentication;
