@@ -6,21 +6,21 @@ namespace ApplicationCore.Helpers.Service
 {
     public class RequestWithResult<T> : Request<ServiceResult<T>>
     {
-        public ServiceResult<T> FailedRequest(List<string> errors)
+        public ServiceResult<T> BadRequest(List<string> errors)
         {
             CreateInstance(false);
             InstanceResult.Errors = SetAllErrors(errors).ToList();
             return InstanceResult;
         }
 
-        public ServiceResult<T> FailedRequest(string error)
+        public ServiceResult<T> BadRequest(string error)
         {
             CreateInstance(false);
             InstanceResult.Errors.Add(SetErrorMessage(0.ToString(), error));
             return InstanceResult;
         }
 
-        public ServiceResult<T> SuccessRequest(T attribute)
+        public ServiceResult<T> GoodRequest(T attribute)
         {
             CreateInstance(true);
             InstanceResult.Result = attribute;

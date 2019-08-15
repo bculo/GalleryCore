@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc.Filters;
 using System;
 using System.Linq;
+using Web.Extensions;
 
 namespace Web.Filters
 {
@@ -12,9 +13,16 @@ namespace Web.Filters
         {
             if (!context.ModelState.IsValid)
             {
-                var controller = context.Controller as Controller;
-                var model = context.ActionArguments?.Count > 0 ? context.ActionArguments.First().Value : null;
-                context.Result = (IActionResult)controller?.View(model) ?? new BadRequestResult();
+                if (context.HttpContext.IsAjaxCall())
+                {
+                    context.Result = new BadRequestResult();
+                }
+                else
+                {
+                    var controller = context.Controller as Controller;
+                    var model = context.ActionArguments?.Count > 0 ? context.ActionArguments.First().Value : null;
+                    context.Result = (IActionResult)controller?.View(model) ?? new BadRequestResult();
+                }
             }
 
             base.OnActionExecuting(context);

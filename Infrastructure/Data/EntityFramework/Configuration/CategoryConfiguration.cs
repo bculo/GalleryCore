@@ -17,6 +17,9 @@ namespace Infrastructure.Data.EntityFramework.Configuration
                 .HasMaxLength(100)
                 .IsRequired();
 
+            builder.HasIndex(item => item.Name)
+                .IsUnique();
+
             builder.Property(item => item.Name)
                 .HasMaxLength(50)
                 .IsRequired();

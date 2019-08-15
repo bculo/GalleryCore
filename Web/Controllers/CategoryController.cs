@@ -2,10 +2,10 @@
 using ApplicationCore.Helpers.Pagination;
 using ApplicationCore.Interfaces;
 using AutoMapper;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Web.Extensions;
 using Web.Filters;
 using Web.Models.Category;
 
@@ -49,20 +49,36 @@ namespace Web.Controllers
         [ValidateAntiForgeryToken]
         public virtual async Task<IActionResult> Create(CreateCategoryModel model)
         {
-            //LOGIC HERE
+            var serviceResult = await service.CreateNewCategoryAsync(model.Name, model.CategoryImage.FileName);
 
-            return View(model);
+            if (!serviceResult.Success)
+            {
+                ModelState.FillWithErrors(serviceResult.Errors);
+                return View(model);
+            }
+
+            await model.CategoryImage.SaveImageAsync(EnvironmentLocation.CategoryLocation, serviceResult.Result);
+
+            return RedirectToAction(nameof(Index), ToString());
         }
 
         [HttpPost]
         [ValidateModel]
         [ValidateAntiForgeryToken]
-        public virtual IActionResult CreateAjax([FromForm] CreateCategoryModel model)
+        public virtual async Task<IActionResult> CreateAjax([FromForm] CreateCategoryModel model)
         {
-            //LOGIC HERE
+            var serviceResult = await service.CreateNewCategoryAsync(model.Name, model.CategoryImage.FileName);
 
-            return Json(new { success = true });
+            if (!serviceResult.Success)
+            {
+                return Json(new { success = false, message = serviceResult.Errors[0] });
+            }
+
+            await model.CategoryImage.SaveImageAsync(EnvironmentLocation.CategoryLocation, serviceResult.Result);
+
+            return Json(new { success = true, redirectAction = nameof(Index) });
         }
 
+        public override string ToString() => nameof(CategoryController);
     }
 }

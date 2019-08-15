@@ -74,11 +74,11 @@ namespace Infrastructure.Services
 
             if (confirmationResult)
             {
-                return result.SuccessRequest();
+                return result.GoodRequest();
             }
             else
             {
-                return result.FailedRequest("Token confirmation failed");
+                return result.BadRequest("Token confirmation failed");
             }
         }
 
@@ -164,10 +164,10 @@ namespace Infrastructure.Services
             var createResult = await manager.CreateUserAsync(user, password);
             if(createResult != null)
             {
-                return serviceResult.SuccessRequest(createResult);
+                return serviceResult.GoodRequest(createResult);
             }
 
-            return serviceResult.FailedRequest("Error");
+            return serviceResult.BadRequest("Error");
         }
 
         /// <summary>
@@ -193,12 +193,12 @@ namespace Infrastructure.Services
             var claimHolder = await manager.CanSignInAsync(userIdentification, password);
             if(claimHolder == null)
             {
-                serviceResult.FailedRequest("Wrong credentials");
+                serviceResult.BadRequest("Wrong credentials");
             }
 
             await Http.SignInAsync(claimHolder.AuthName, claimHolder.ClaimsPrincipal);
 
-            return serviceResult.SuccessRequest(claimHolder.Uploder);
+            return serviceResult.GoodRequest(claimHolder.Uploder);
         }
 
         /// <summary>
@@ -240,10 +240,10 @@ namespace Infrastructure.Services
 
             if (success)
             {
-                resultFactory.FailedRequest("Password recovery failed");
+                resultFactory.BadRequest("Password recovery failed");
             }
 
-            return resultFactory.SuccessRequest();
+            return resultFactory.GoodRequest();
         }
 
         /// <summary>
@@ -272,7 +272,7 @@ namespace Infrastructure.Services
 
             if (!allAuthScheme.Contains(provider))
             {
-                return result.FailedRequest("Requested provider is not supported");
+                return result.BadRequest("Requested provider is not supported");
             }
 
             var items = new Dictionary<string, string>()
@@ -280,7 +280,7 @@ namespace Infrastructure.Services
                 { "LoginProvider", provider }
             };
 
-            return result.SuccessRequest(new ExternalAuthProperties(redirectUrl, items));
+            return result.GoodRequest(new ExternalAuthProperties(redirectUrl, items));
         }
 
         public virtual async Task<bool> ExecuteExternalLogin()

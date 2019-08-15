@@ -1,4 +1,5 @@
-﻿using ApplicationCore.Helpers.Pagination;
+﻿using ApplicationCore.Helpers.Generator;
+using ApplicationCore.Helpers.Pagination;
 using ApplicationCore.Interfaces;
 using ApplicationCore.Services;
 using Infrastructure.Data.EntityFramework;
@@ -25,6 +26,7 @@ namespace Web.Configuration
             services.AddScoped(typeof(IPaginationMaker<>), typeof(PaginationMaker<>));
             services.AddScoped(typeof(IPaginationModel<>), typeof(PaginationModel<>));
             services.AddTransient<IPaginationChecker, PaginationChecker>();
+            services.AddTransient<IUniqueStringGenerator, GuidStringGenerator>();
 
             //Infrastracture project
             services.AddScoped(typeof(ISpecificationEvaluator<>), typeof(EfSpecificationEvaluator<>));

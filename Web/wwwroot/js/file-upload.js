@@ -1,20 +1,25 @@
-﻿//Note: this file use jquery
-function Item(key, value) {
+﻿function Item(key, value) {
     this.key = key;
     this.value = value;
 }
 
-function FileUpload() {
-    var items = []; 
-    var destinationUrl = ""; 
+function AjaxCallResult(status, message) {
+    this.status = status;
+    this.message = message;
+}
 
-    this.setUploadUrl = function (url) {
-        destinationUrl = url;
-    }
+function FileUpload(onUploadFunction, destinationUrl) {
+    var executeFunctionOnUpload = onUploadFunction;
+    var items = [];
+    var destinationUrl = destinationUrl;
 
     this.addItem = function (key, value) {
         let pair = new Item(key, value);
         items.push(pair);
+    }
+
+    this.removeItem = function (keyOfItem) {
+        items = items.filter(item => item.key != keyOfItem);
     }
 
     this.uploadForm = function () {
@@ -30,11 +35,19 @@ function FileUpload() {
             contentType: false,
             processData: false,
             data: formData,
-            success: function (message) {
-                //Add return
+            success: function () {
+                if (Reflect.has(result, "success") && Reflect.has(result, "redirectAction")) {
+                    executeFunctionOnUpload(new AjaxCallResult(result.success, result.redirectAction));
+                }
+
+                executeFunctionOnUpload(new AjaxCallResult(true, "Index"));
             },
-            error: function () {
-                //Add return
+            error: function (result) {
+                if (Reflect.has(result, "success") && Reflect.has(result, "message")) {
+                    executeFunctionOnUpload(new AjaxCallResult(result.success, result.message));
+                }
+
+                executeFunctionOnUpload(new AjaxCallResult(false, "Error"));
             }
         });
     }

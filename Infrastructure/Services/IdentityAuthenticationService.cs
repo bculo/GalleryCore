@@ -158,7 +158,7 @@ namespace Infrastructure.Services
             var instance = GetSpecificServiceInstance<AppIdentityDbContext>();
             if (instance == null)
             {
-                return resultFactory.FailedRequest("Problem with server, try again later");
+                return resultFactory.BadRequest("Problem with server, try again later");
             }
 
             await ExecuteRegistrationTransaction(instance, user, password, resultFactory);
@@ -185,7 +185,7 @@ namespace Infrastructure.Services
       
                         if (!createResult.Succeeded) //Check status of operation
                         {
-                            serviceResult.FailedRequest(createResult.Errors.Select(item => item.Description).ToList());
+                            serviceResult.BadRequest(createResult.Errors.Select(item => item.Description).ToList());
                             throw new Exception("Failed to add user to identity database");
                         }
 
@@ -196,23 +196,23 @@ namespace Infrastructure.Services
 
                         if (!roleResult.Result.Succeeded) // Check status of adding role to user
                         {
-                            serviceResult.FailedRequest("Problem with registration");
+                            serviceResult.BadRequest("Problem with registration");
                             throw new Exception("Failed to add role to user");
                         }
 
                         if (!string.IsNullOrEmpty(galleryDatabase.Result.errorMessage)) //Check status of adding user to gallery database
                         {
-                            serviceResult.FailedRequest("Problem with registration");
+                            serviceResult.BadRequest("Problem with registration");
                             throw new Exception("Failed to add role to user");
                         }
 
                         transaction.Commit(); // commit transaction
-                        serviceResult.SuccessRequest(user);
+                        serviceResult.GoodRequest(user);
                     }
                     catch(Exception e) //Just for debuging purpose
                     {
                         transaction?.Rollback();
-                        serviceResult.FailedRequest("Problem with registration");
+                        serviceResult.BadRequest("Problem with registration");
                     }
                 }
             });
@@ -242,12 +242,12 @@ namespace Infrastructure.Services
 
             if (user == null)
             {
-                return resultFactory.FailedRequest("Used doesnt exist");
+                return resultFactory.BadRequest("Used doesnt exist");
             }
 
             var resutlToken = await userManager.ConfirmEmailAsync(user, token);
 
-            return resultFactory.SuccessRequest();
+            return resultFactory.GoodRequest();
         }
 
         /// <summary>
@@ -280,17 +280,17 @@ namespace Infrastructure.Services
 
             if (user == null)
             {
-                return resultFactory.FailedRequest("Used doesnt exist");
+                return resultFactory.BadRequest("Used doesnt exist");
             }
 
             var resutlToken = await userManager.ResetPasswordAsync(user, token, newPassword);
 
             if (!resutlToken.Succeeded)
             {
-                resultFactory.FailedRequest(resutlToken.Errors.Select(item => item.Description).ToList());
+                resultFactory.BadRequest(resutlToken.Errors.Select(item => item.Description).ToList());
             }
 
-            return resultFactory.SuccessRequest();
+            return resultFactory.GoodRequest();
         }
 
         /// <summary>
@@ -326,17 +326,17 @@ namespace Infrastructure.Services
 
             if (user == null)
             {
-                return serviceResult.FailedRequest("Wrong credentials");
+                return serviceResult.BadRequest("Wrong credentials");
             }
 
             var signInResult = await signInManager.PasswordSignInAsync(user as GalleryUser, password, false, false);
 
             if (!signInResult.Succeeded)
             {
-                return serviceResult.FailedRequest("Wrong credentials");
+                return serviceResult.BadRequest("Wrong credentials");
             }
 
-            return serviceResult.SuccessRequest(user);
+            return serviceResult.GoodRequest(user);
         }
 
         /// <summary>
@@ -374,12 +374,12 @@ namespace Infrastructure.Services
 
             if (!allAuthScheme.Contains(provider))
             {
-                return result.FailedRequest("Requested provider is not supported");
+                return result.BadRequest("Requested provider is not supported");
             }
 
             AuthenticationProperties prop = signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
 
-            return result.SuccessRequest(new ExternalAuthProperties(redirectUrl, prop.Items));
+            return result.GoodRequest(new ExternalAuthProperties(redirectUrl, prop.Items));
         }
 
         /// <summary>
