@@ -8,8 +8,8 @@
 
 <div>
     <p>Current page: @Model.Pagination.CurrentPage</p>
-    <p>Total records: @Model.Pagination.NumberOfItems</p>
-    <p>Total pages: @Model.Pagination.LastPage</p>
+    <p>Total records: @Model.Pagination.TotalItems</p>
+    <p>Total pages: @Model.Pagination.TotalPages</p>
 
     <form method="get" asp-action="Index">
 
@@ -22,7 +22,7 @@
     </form>
 
 
-        @foreach (var item in @Model.Pagination.ResultsSet)
+        @foreach (var item in @Model.Categories)
         {
             <p>@item.Name</p>
             <p>@item.Name</p>

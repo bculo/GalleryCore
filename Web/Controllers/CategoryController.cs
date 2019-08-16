@@ -1,9 +1,6 @@
-﻿using ApplicationCore.Entities;
-using ApplicationCore.Helpers.Pagination;
-using ApplicationCore.Interfaces;
+﻿using ApplicationCore.Interfaces;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Web.Extensions;
 using Web.Filters;
@@ -15,29 +12,23 @@ namespace Web.Controllers
     {
         private readonly IMapper mapper;
         private readonly ICategoryService service;
-        private readonly IPaginationMaker<CategoryModel> maker;
 
-        public CategoryController(ICategoryService service, IMapper mapper, IPaginationMaker<CategoryModel> maker)
+        public CategoryController(ICategoryService service, IMapper mapper)
         {
             this.mapper = mapper;
             this.service = service;
-            this.maker = maker;
         }
 
         [HttpGet]
         public virtual async Task<IActionResult> Index(int? page, string searchQuery)
         {
-            //Get pagination result for categories based on choosen page and search query
-            PaginationResult<Category> serviceResult = await service.GetCategories(page, searchQuery);
+            var paginationModel = await service.GetCategories(page, searchQuery);
 
-            // From List<Category> to List<CategoryModel>
-            var categoryModels = mapper.Map<List<CategoryModel>>(serviceResult.ResultSet);
-
-            //Prepare pagination model
-            IPaginationModel<CategoryModel> pagination = maker.PreparePaginationModel(categoryModels, serviceResult.Options);
+            var categoryView = mapper.Map<CategoryViewModel>(paginationModel);
+            categoryView.SearchCategory = searchQuery ?? "";
 
             //Display CategoryViewModel
-            return View(new CategoryViewModel { SearchCategory = searchQuery ?? "", Pagination = pagination });
+            return View(categoryView);
         }
 
         //Only Moderator and Administrator roles

@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace ApplicationCore.Helpers.Service
 {
-    public class RequestWithResult<T> : Request<ServiceResult<T>>
+    public class RequestResult<T> : Request<ServiceResult<T>>
     {
         public ServiceResult<T> BadRequest(List<string> errors)
         {

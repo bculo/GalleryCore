@@ -23,8 +23,7 @@ namespace Web.Configuration
         {
             //Core project
             services.AddScoped<ICategoryService, CategoryService>();
-            services.AddScoped(typeof(IPaginationMaker<>), typeof(PaginationMaker<>));
-            services.AddScoped(typeof(IPaginationModel<>), typeof(PaginationModel<>));
+            services.AddScoped<IPaginationMaker, PaginationMaker>();
             services.AddTransient<IPaginationChecker, PaginationChecker>();
             services.AddTransient<IUniqueStringGenerator, GuidStringGenerator>();
 

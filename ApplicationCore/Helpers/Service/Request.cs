@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace ApplicationCore.Helpers.Service
 {
-    public abstract class Request<T> where T : IServiceResult, new()
+    public abstract class Request<T> where T : IServiceResponse, new()
     {
         public T InstanceResult { get; set; }
 

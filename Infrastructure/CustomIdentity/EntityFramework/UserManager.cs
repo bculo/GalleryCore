@@ -231,7 +231,7 @@ namespace Infrastructure.CustomIdentity.EntityFramework
 
             user.PasswordHash = await hasher.Hash(password);
 
-            var result = new RequestWithResult<AppUser>();
+            var result = new RequestResult<AppUser>();
 
             try
             {

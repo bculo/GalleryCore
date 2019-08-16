@@ -153,7 +153,7 @@ namespace Infrastructure.Services
         /// <returns>Instnace of IUploader</returns>
         protected virtual async Task<ServiceResult<IUploader>> RegistrationProcess(IUploader user, string password)
         {
-            var resultFactory = new RequestWithResult<IUploader>();
+            var resultFactory = new RequestResult<IUploader>();
 
             var instance = GetSpecificServiceInstance<AppIdentityDbContext>();
             if (instance == null)
@@ -172,7 +172,7 @@ namespace Infrastructure.Services
         /// <param name="strategy"></param>
         /// <returns></returns>
         protected virtual async Task ExecuteRegistrationTransaction(DbContext database, IUploader user, string password,
-            RequestWithResult<IUploader> serviceResult)
+            RequestResult<IUploader> serviceResult)
         {
             IExecutionStrategy databaseStrategy = database.Database.CreateExecutionStrategy();
             await databaseStrategy.ExecuteAsync(async () =>
@@ -322,7 +322,7 @@ namespace Infrastructure.Services
                 user = await GetUserByUserNameAsync(userIdentification);
             }
 
-            var serviceResult = new RequestWithResult<IUploader>();
+            var serviceResult = new RequestResult<IUploader>();
 
             if (user == null)
             {
@@ -366,7 +366,7 @@ namespace Infrastructure.Services
                 throw new ArgumentNullException(nameof(redirectUrl));
             }
 
-            var result = new RequestWithResult<IAuthProperties>();
+            var result = new RequestResult<IAuthProperties>();
 
             var allAuthScheme = (await signInManager.GetExternalAuthenticationSchemesAsync())
                 .Select(item => item.Name)

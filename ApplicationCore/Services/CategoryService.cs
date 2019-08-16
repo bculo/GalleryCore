@@ -1,6 +1,5 @@
 ﻿using ApplicationCore.Entities;
 using ApplicationCore.Exceptions;
-using ApplicationCore.Extensions;
 using ApplicationCore.Helpers.Generator;
 using ApplicationCore.Helpers.Pagination;
 using ApplicationCore.Helpers.Service;
@@ -8,7 +7,6 @@ using ApplicationCore.Interfaces;
 using ApplicationCore.Specifications;
 using System;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace ApplicationCore.Services
@@ -18,6 +16,7 @@ namespace ApplicationCore.Services
         protected readonly IAsyncRepository<Category> repository;
         protected readonly IPaginationChecker checker;
         protected readonly IUniqueStringGenerator generator;
+        protected readonly IPaginationMaker maker;
 
         public virtual int PageSize
         {
@@ -36,11 +35,13 @@ namespace ApplicationCore.Services
 
         public CategoryService(IAsyncRepository<Category> repository,
             IPaginationChecker checker,
-            IUniqueStringGenerator generator)
+            IUniqueStringGenerator generator,
+            IPaginationMaker maker)
         {
             this.repository = repository;
             this.checker = checker;
             this.generator = generator;
+            this.maker = maker;
         }
 
         /// <summary>
@@ -49,7 +50,7 @@ namespace ApplicationCore.Services
         /// <param name="page">current page</param>
         /// <param name="searchQuery">search query</param>
         /// <returns>Instnace of PaginationResult</returns>
-        public virtual async Task<PaginationResult<Category>> GetCategories(int? page, string searchQuery)
+        public virtual async Task<PaginationModel<Category>> GetCategories(int? page, string searchQuery)
         {
             int currentPage = page ?? 1;
             string search = searchQuery ?? string.Empty;
@@ -62,7 +63,8 @@ namespace ApplicationCore.Services
             var secondSpecification = new CategorySpecification(Skip(currentPage), PageSize, searchQuery ?? "");
             var listOfCategories = await repository.ListAsync(secondSpecification);
 
-            return new PaginationResult<Category>(currentPage, numberOfCategories, listOfCategories, PageSize);
+            var pgOptions = new PaginationOptions(currentPage, numberOfCategories, PageSize);
+            return maker.PreparePaginationModel(listOfCategories, pgOptions);
         }
 
         /// <summary>
@@ -82,7 +84,7 @@ namespace ApplicationCore.Services
                 throw new ArgumentNullException(nameof(imageName));
             }
 
-            var serviceResult = new RequestWithResult<string>();
+            var serviceResult = new RequestResult<string>();
 
             var newCategoryInstance = new Category
             {

@@ -151,7 +151,7 @@ namespace Infrastructure.Services
         /// <returns></returns>
         public virtual async Task<ServiceResult<IUploader>> RegisterUserAsync(string userName, string email, string password)
         {
-            var instance = new RequestWithResult<IUploader>();
+            var instance = new RequestResult<IUploader>();
 
             var user = new AppUser
             {
@@ -159,7 +159,7 @@ namespace Infrastructure.Services
                 UserName = userName,
             };
 
-            var serviceResult = new RequestWithResult<IUploader>();
+            var serviceResult = new RequestResult<IUploader>();
 
             var createResult = await manager.CreateUserAsync(user, password);
             if(createResult != null)
@@ -188,7 +188,7 @@ namespace Infrastructure.Services
                 throw new ArgumentNullException(nameof(password));
             }
 
-            var serviceResult = new RequestWithResult<IUploader>();
+            var serviceResult = new RequestResult<IUploader>();
 
             var claimHolder = await manager.CanSignInAsync(userIdentification, password);
             if(claimHolder == null)
@@ -264,7 +264,7 @@ namespace Infrastructure.Services
                 throw new ArgumentNullException(nameof(redirectUrl));
             }
 
-            var result = new RequestWithResult<IAuthProperties>();
+            var result = new RequestResult<IAuthProperties>();
 
             var allAuthScheme = (await schemeProvider.GetRequestHandlerSchemesAsync())
                 .Select(item => item.Name)

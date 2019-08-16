@@ -4,130 +4,60 @@ using System.Linq;
 
 namespace ApplicationCore.Helpers.Pagination
 {
-    public class PaginationMaker<T> : IPaginationMaker<T> where T : class
+    public class PaginationMaker : IPaginationMaker
     {
-        protected bool PaginationCreated { get; set; } = false;
-        protected int PageSize { get; set; }
-        protected int MaxPagesToShow { get; set; }
-        protected IPaginationModel<T> paginationModel;
-
-        /// <summary>
-        /// Throw InvalidOperationException if FillPaginationModel method is not called first
-        /// </summary>
-        public virtual IPaginationModel<T> Pagination
+        public PaginationModel<DataType> PreparePaginationModel<DataType>(
+            IEnumerable<DataType> data, 
+            PaginationOptions opt) where DataType : class
         {
-            get
+            //Create generic pagination model
+            var pagModel = new PaginationModel<DataType>
             {
-                if (!PaginationCreated)
+                Data = data,
+                CurrentPage = opt.CurrentPage,
+                TotalItems = opt.NumberOfItems,
+                PageSize = opt.PageSize,
+            };
+
+            pagModel.TotalPages = (int)Math.Ceiling((decimal)pagModel.TotalItems / pagModel.PageSize);
+            
+            if(pagModel.TotalPages <= opt.ButtonToShow)
+            {
+                //case [ 1, 2, 3, 4, 5, 6, 7 ]
+                //we have less then opt.ButtonToShow = 10, so we need to show buttons for all pages
+                pagModel.StartPage = 1;
+                pagModel.EndPage = pagModel.TotalPages;
+            }
+            else //case [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 ]
+            {
+                //show button for pages before currentpage
+                var maxPagesBeforeCurrentPage = (int)Math.Floor((decimal)opt.ButtonToShow / 2);
+                //show button for pages after currentpage
+                var maxPagesAfterCurrentPage = (int)Math.Ceiling((decimal)opt.ButtonToShow / 2) - 1;
+
+                // current page is 3
+                // so maxPagesBeforeCurrentPage is ~ 5
+                // result of 3 - 5 is -2 and we dont have a page with index -2, so we need to set start page on index = 1
+                if (pagModel.CurrentPage <= maxPagesAfterCurrentPage)
                 {
-                    throw new InvalidOperationException("IPaginationModel<T> is empty");
+                    pagModel.StartPage = 1;
+                    pagModel.EndPage = opt.ButtonToShow;
                 }
-
-                return paginationModel;
-            }
-        }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="paginationModel"></param>
-        public PaginationMaker(IPaginationModel<T> paginationModel) => this.paginationModel = paginationModel;
-
-        /// <summary>
-        /// Make pagination model based on pagination result
-        /// </summary>
-        /// <param name="paginationResult"></param>
-        /// <returns></returns>
-        public virtual IPaginationModel<T> PreparePaginationModel(PaginationResult<T> paginationResult, int pageButtonsToShow = 5)
-        {
-            PaginationOptions options = paginationResult.Options;
-
-            SetCommonValues(paginationResult.ResultSet, options.CurrentPage, options.NumberOfItems, options.PageSize, pageButtonsToShow);
-
-            CreatePagination();
-
-            return paginationModel;
-        }
-
-        /// <summary>
-        /// Make pagination model based on data and pagination result
-        /// This method doesnt use paginationResult.ResultSet
-        /// </summary>
-        /// <param name="data">Data to show</param>
-        /// <param name="paginationResult">Instance of pagination result</param>
-        /// <returns></returns>
-        public IPaginationModel<T> PreparePaginationModel(IEnumerable<T> data, PaginationOptions options, int pageButtonsToShow = 5)
-        {
-            SetCommonValues(data, options.CurrentPage, options.NumberOfItems, options.PageSize, pageButtonsToShow);
-
-            CreatePagination();
-
-            return paginationModel;
-        }
-
-        /// <summary>
-        /// Create pagination (Calculation)
-        /// </summary>
-        protected virtual void CreatePagination()
-        {
-            paginationModel.LastPage = (int)Math.Ceiling(Decimal.Divide(paginationModel.NumberOfItems, PageSize));
-
-            //check if user manually changed settings
-            if (paginationModel.CurrentPage < 1)
-            {
-                paginationModel.CurrentPage = 1;
-            }
-            else if (paginationModel.CurrentPage > paginationModel.LastPage)
-            {
-                paginationModel.StartPageShow = 1;
-            }
-
-            if (paginationModel.LastPage <= MaxPagesToShow) //total pages less than max, show all pages
-            {
-                paginationModel.StartPageShow = 1;
-                paginationModel.EndPageShow = paginationModel.LastPage;
-            }
-            else //more pages than max so calculate start and end pages
-            {
-                var maxPagesBeforeCurrentPage = (int)Math.Floor(MaxPagesToShow / (decimal)2);
-                var maxPagesAfterCurrentPage = (int)Math.Ceiling(MaxPagesToShow / (decimal)2) - 1;
-
-                if (paginationModel.CurrentPage <= maxPagesBeforeCurrentPage) //current page near the start
+                else if (pagModel.CurrentPage + maxPagesAfterCurrentPage >= pagModel.TotalPages) // current page near the end
                 {
-                    paginationModel.StartPageShow = 1;
-                    paginationModel.EndPageShow = MaxPagesToShow;
+                    pagModel.StartPage = pagModel.TotalPages - opt.ButtonToShow + 1;
+                    pagModel.EndPage = pagModel.TotalPages;
                 }
-                else if (paginationModel.CurrentPage + maxPagesAfterCurrentPage >= paginationModel.LastPage) //current page near the end
+                else // current page somewhere in the middle
                 {
-                    paginationModel.StartPageShow = paginationModel.LastPage - MaxPagesToShow + 1;
-                    paginationModel.EndPageShow = paginationModel.LastPage;
-                }
-                else //current page somewhere in the middle
-                {
-                    paginationModel.StartPageShow = paginationModel.CurrentPage - maxPagesBeforeCurrentPage;
-                    paginationModel.EndPageShow = paginationModel.CurrentPage + maxPagesAfterCurrentPage;
+                    pagModel.StartPage = pagModel.CurrentPage - maxPagesBeforeCurrentPage;
+                    pagModel.EndPage = pagModel.CurrentPage + maxPagesAfterCurrentPage;
                 }
             }
 
-            paginationModel.Pages = Enumerable.Range(paginationModel.StartPageShow, paginationModel.EndPageShow);
-        }
+            pagModel.Pages = Enumerable.Range(pagModel.StartPage, pagModel.EndPage);
 
-        /// <summary>
-        /// Set common values for pagination
-        /// </summary>
-        /// <param name="data">Data to show</param>
-        /// <param name="currentPage">Current page</param>
-        /// <param name="totalItems">Total items to show</param>
-        /// <param name="pageSize">Number of items per page</param>
-        /// <param name="maxPages">Max pages to choose</param>
-        protected virtual void SetCommonValues(IEnumerable<T> data, int currentPage, int totalItems, int pageSize, int maxPages)
-        {
-            PaginationCreated = true;
-            paginationModel.ResultsSet = data;
-            paginationModel.CurrentPage = currentPage;
-            paginationModel.NumberOfItems = totalItems;
-            MaxPagesToShow = maxPages;
-            PageSize = pageSize;
+            return pagModel;
         }
     }
 }

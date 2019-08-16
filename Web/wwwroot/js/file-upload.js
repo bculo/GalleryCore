@@ -35,7 +35,7 @@ function FileUpload(onUploadFunction, destinationUrl) {
             contentType: false,
             processData: false,
             data: formData,
-            success: function () {
+            success: function (result) {
                 if (Reflect.has(result, "success") && Reflect.has(result, "redirectAction")) {
                     executeFunctionOnUpload(new AjaxCallResult(result.success, result.redirectAction));
                 }
