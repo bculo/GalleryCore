@@ -1,6 +1,4 @@
-﻿using ApplicationCore.Helpers.Pagination;
-using System.Collections.Generic;
-using Web.Extensions;
+﻿using System.Collections.Generic;
 
 namespace Web.Models.Category
 {
@@ -9,6 +7,5 @@ namespace Web.Models.Category
         public string SearchCategory { get; set; } = string.Empty;
         public PaginationsProperties Pagination { get; set; }
         public IEnumerable<CategoryModel> Categories;
-        public string CategoryPath = EnvironmentLocation.CategoryLocation;
     }
 }

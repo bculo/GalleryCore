@@ -22,12 +22,15 @@
     </form>
 
 
+    <div class="image-container">
+
         @foreach (var item in @Model.Categories)
         {
-            <p>@item.Name</p>
-            <p>@item.Name</p>
 
-            <hr />
+            <img src="@item.Url" alt="Image" class="image-container-item" />
+
         }
 
     </div>
+
+</div>

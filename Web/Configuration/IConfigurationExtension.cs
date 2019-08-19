@@ -5,7 +5,7 @@ namespace Web.Configuration
     /// <summary>
     /// Checking type of authentication
     /// </summary>
-    public static class ConfigurationAuthenticationExtension
+    public static class IConfigurationExtension
     {
         private static bool? usingIdentity;
 

@@ -2,7 +2,7 @@
 
 namespace ApplicationCore.Helpers.Pagination
 {
-    public class PaginationModel<T>
+    public class PaginationModel<T> : IPaginationModel<T>
     {
         public int TotalItems { get; set; }
         public int CurrentPage { get; set; }

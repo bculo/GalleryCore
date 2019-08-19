@@ -25,7 +25,7 @@ namespace ApplicationCore.Services
 
         public int Skip(int currentPage)
         {
-            if(currentPage < 1)
+            if (currentPage < 1)
             {
                 throw new PaginationException("Current page needs to be greater then 0");
             }
@@ -50,7 +50,7 @@ namespace ApplicationCore.Services
         /// <param name="page">current page</param>
         /// <param name="searchQuery">search query</param>
         /// <returns>Instnace of PaginationResult</returns>
-        public virtual async Task<PaginationModel<Category>> GetCategories(int? page, string searchQuery)
+        public virtual async Task<IPaginationModel<Category>> GetCategories(int? page, string searchQuery)
         {
             int currentPage = page ?? 1;
             string search = searchQuery ?? string.Empty;

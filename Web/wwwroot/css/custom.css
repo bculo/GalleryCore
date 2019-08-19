@@ -1,0 +1,28 @@
+﻿/* DRAG AND DROP */
+#drag-and-drop-div {
+    width: 300px;
+    height: 200px;
+    border: 3px dashed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#image-drag-and-drop {
+    max-width: 300px;
+    max-height: 200px;
+}
+
+/* CATEGORY CONTAINERS */
+.image-container {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.image-container-item{
+    margin: 25px 25px;
+    height: 300px;
+    width: 300px;
+    overflow: hidden;
+}

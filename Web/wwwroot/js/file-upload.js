@@ -9,48 +9,50 @@ function AjaxCallResult(status, message) {
 }
 
 function FileUpload(onUploadFunction, destinationUrl) {
-    var executeFunctionOnUpload = onUploadFunction;
-    var items = [];
-    var destinationUrl = destinationUrl;
+    this.executeFunctionOnUpload = onUploadFunction;
+    this.items = [];
+    this.destinationUrl = destinationUrl;
+}
 
-    this.addItem = function (key, value) {
-        let pair = new Item(key, value);
-        items.push(pair);
+FileUpload.prototype.addItem = function (key, value) {
+    let pair = new Item(key, value);
+    this.items.push(pair);
+}
+
+FileUpload.prototype.removeItem = function (keyOfItem) {
+    this.items = this.items.filter(item => item.key != keyOfItem);
+}
+
+FileUpload.prototype.uploadForm = function () {
+    let formData = new FormData();
+
+    for (var item of this.items) {
+        formData.append(item.key, item.value)
     }
 
-    this.removeItem = function (keyOfItem) {
-        items = items.filter(item => item.key != keyOfItem);
-    }
+    let callBackFunction = this.executeFunctionOnUpload;
 
-    this.uploadForm = function () {
-        let formData = new FormData();
-
-        for (var item of items) {
-            formData.append(item.key, item.value)
-        }
-
-        $.ajax({
-            type: "post",
-            url: destinationUrl,
-            contentType: false,
-            processData: false,
-            data: formData,
-            success: function (result) {
-                if (Reflect.has(result, "success") && Reflect.has(result, "redirectAction")) {
-                    executeFunctionOnUpload(new AjaxCallResult(result.success, result.redirectAction));
-                }
-
-                executeFunctionOnUpload(new AjaxCallResult(true, "Index"));
-            },
-            error: function (result) {
-                if (Reflect.has(result, "success") && Reflect.has(result, "message")) {
-                    executeFunctionOnUpload(new AjaxCallResult(result.success, result.message));
-                }
-
-                executeFunctionOnUpload(new AjaxCallResult(false, "Error"));
+    $.ajax({
+        type: "post",
+        url: this.destinationUrl,
+        contentType: false,
+        processData: false,
+        data: formData,
+        success: function (result) {
+            if (Reflect.has(result, "success") && Reflect.has(result, "redirectAction")) {
+                callBackFunction(new AjaxCallResult(result.success, result.redirectAction));
             }
-        });
-    }
+
+            callBackFunction(new AjaxCallResult(true, "Index"));
+        },
+        error: function (result) {
+            if (Reflect.has(result, "success") && Reflect.has(result, "message")) {
+                callBackFunction(new AjaxCallResult(result.success, result.message));
+            }
+
+            callBackFunction(new AjaxCallResult(false, "Error"));
+        }
+    });
 }
 
 

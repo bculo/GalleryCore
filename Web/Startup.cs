@@ -1,9 +1,12 @@
 ﻿using Infrastructure.CustomIdentity.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
+using System.IO;
 using Web.Configuration;
 
 namespace Web
@@ -48,7 +51,14 @@ namespace Web
             }
 
             app.UseHttpsRedirection();
-            app.UseStaticFiles();
+
+            app.UseStaticFiles(); //use this if images are stored in wwwroot folder
+            app.UseStaticFiles(new StaticFileOptions() //Files are stored inside /Files folder
+            {
+                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Files")),
+                RequestPath = new PathString("/Files")
+            });
+
             app.UseCookiePolicy();
 
             app.UseAuthentication(); //Importanz part for authentication

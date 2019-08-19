@@ -42,7 +42,6 @@ function submitFile(e) {
         return;
     }
 
-    //let file = $(my.categoryImageSelector).prop('files')[0];
     let file = dragAndDrop.getFile().file;
     let name = $(my.nameInputSelector).val();
 
