@@ -14,7 +14,7 @@ function DragAndDrop(insertAfterElementWithId, validFileExtensionsAsArray) {
 
     //Add drag and drop area
     var dragAndDropId = "#drag-and-drop-div";
-    var dragAndDropDiv = "<div id='drag-and-drop-div'></div>"
+    var dragAndDropDiv = "<div id='drag-and-drop-div'><p>Drag image here!</p></div>"
     $(dragAndDropDiv).insertAfter($(insertAfterElementWithId));
 
     var buttonRemove = "#remove-drag-and-drop-image";
@@ -69,7 +69,7 @@ function DragAndDrop(insertAfterElementWithId, validFileExtensionsAsArray) {
             $("#image-drag-and-drop").attr('src', e.target.result);
 
             //Add remove button and add on click listener
-            $("<button id='remove-drag-and-drop-image'>REMOVE IMAGE</button>").insertAfter($(dragAndDropId));
+            $("<div id='remove-drag-and-drop-image'>X</div>").appendTo($(dragAndDropId));
             $(buttonRemove).click(clearContent)
         });
 
@@ -81,6 +81,7 @@ function DragAndDrop(insertAfterElementWithId, validFileExtensionsAsArray) {
     function clearContent() {
         removeFile();
         $(dragAndDropId).empty();
+        $("<p>Drag image here!</p>").appendTo($(dragAndDropId));
         $(buttonRemove).remove();
     }
 

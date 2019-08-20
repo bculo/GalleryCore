@@ -24,7 +24,6 @@ namespace Web.Configuration
             //Core project
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<IPaginationMaker, PaginationMaker>();
-            services.AddTransient<IPaginationChecker, PaginationChecker>();
             services.AddTransient<IUniqueStringGenerator, GuidStringGenerator>();
 
             //Infrastracture project

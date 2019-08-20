@@ -14,13 +14,12 @@ namespace ApplicationCore.Services
     public class CategoryService : ICategoryService, IPaginationService
     {
         protected readonly IAsyncRepository<Category> repository;
-        protected readonly IPaginationChecker checker;
         protected readonly IUniqueStringGenerator generator;
         protected readonly IPaginationMaker maker;
 
         public virtual int PageSize
         {
-            get => 10;
+            get => 9;
         }
 
         public int Skip(int currentPage)
@@ -34,12 +33,10 @@ namespace ApplicationCore.Services
         }
 
         public CategoryService(IAsyncRepository<Category> repository,
-            IPaginationChecker checker,
             IUniqueStringGenerator generator,
             IPaginationMaker maker)
         {
             this.repository = repository;
-            this.checker = checker;
             this.generator = generator;
             this.maker = maker;
         }
@@ -58,7 +55,7 @@ namespace ApplicationCore.Services
             var firstSpecification = new CategorySpecification(searchQuery ?? "");
             var numberOfCategories = await repository.CountAsync(firstSpecification);
 
-            currentPage = checker.CheckPageLimits(currentPage, numberOfCategories, PageSize); //is requested page valid ?
+            currentPage = maker.CheckPageLimits(currentPage, numberOfCategories, PageSize); //is requested page valid ?
 
             var secondSpecification = new CategorySpecification(Skip(currentPage), PageSize, searchQuery ?? "");
             var listOfCategories = await repository.ListAsync(secondSpecification);

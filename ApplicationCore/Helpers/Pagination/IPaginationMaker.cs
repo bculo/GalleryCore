@@ -12,5 +12,7 @@ namespace ApplicationCore.Helpers.Pagination
             IEnumerable<DataType> data,
             PaginationOptions options)
             where DataType : class;
+
+        int CheckPageLimits(int currentPage, int numberOfInstances, int pageSize, int lowestLimit = 1);
     }
 }
