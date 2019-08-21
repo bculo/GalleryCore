@@ -15,6 +15,12 @@ namespace Web.Filters
             {
                 RedirectOnException(context.Result, "Error", "AppBadRequest");
             }
+
+            if (context.Exception is InvalidRequest)
+            {
+                RedirectOnException(context.Result, "Error", "AppBadRequest");
+            }
+
             else if(context.Exception is InvalidUserException)
             {
                 RedirectOnException(context.Result, "Authentication", "Login");

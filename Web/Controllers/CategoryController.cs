@@ -2,7 +2,9 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using System.Threading.Tasks;
+using Web.Configuration;
 using Web.Extensions;
 using Web.Filters;
 using Web.Interfaces;
@@ -10,26 +12,34 @@ using Web.Models.Category;
 
 namespace Web.Controllers
 {
+    [ErrorFilter]
     public class CategoryController : Controller, IControllerInformation
     {
-        public string Name => nameof(CategoryController);
-
         private readonly IMapper mapper;
         private readonly ICategoryService service;
         private readonly IHostingEnvironment environment;
+        private readonly PaginationSettings settings;
 
-        public CategoryController(ICategoryService service, IMapper mapper, IHostingEnvironment environment)
+        public string Name => nameof(CategoryController);
+
+        public CategoryController(ICategoryService service,
+            IMapper mapper,
+            IHostingEnvironment environment,
+            IOptions<PaginationSettings> settings)
         {
             this.mapper = mapper;
             this.service = service;
             this.environment = environment;
+            this.settings = settings.Value;
         }
+
+        #region Display section
 
         [HttpGet]
         public virtual async Task<IActionResult> Index(int? page, string searchQuery)
         {
-            //Get ICategoryService result
-            var paginationModel = await service.GetCategories(page, searchQuery);
+            //Get pagination result
+            var paginationModel = await service.GetCategoriesAsync(page, searchQuery, settings.CategoryPageSize);
 
             //Prepare CategoryViewModel instance
             var categoryView = mapper.Map<CategoryViewModel>(paginationModel);
@@ -40,7 +50,28 @@ namespace Web.Controllers
             return View(categoryView);
         }
 
-        //Only Moderator and Administrator roles
+        #endregion
+
+        #region Edit section
+
+        [HttpGet]
+        [Route("/Edit/{categoryId}")]
+        public virtual async Task<IActionResult> Edit(int categoryId)
+        {
+            //Get category
+            var serviceResult = await service.GetCategoryAsync(categoryId);
+
+            //Map Category to CategoryModel
+            var categoryModel = mapper.Map<EditCategoryModel>(serviceResult);
+
+            //Display category model
+            return View(categoryModel);
+        }
+
+        #endregion
+
+        #region Create section
+
         [HttpGet]
         public virtual IActionResult Create() => View();
 
@@ -95,5 +126,6 @@ namespace Web.Controllers
             return Json(new { success = true, redirectAction = nameof(Index) });
         }
 
+        #endregion
     }
 }

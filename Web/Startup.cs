@@ -28,6 +28,7 @@ namespace Web
             services.ConfigureMail(Configuration);
             services.ConfigureServices(Configuration);
             services.ConfigureAutoMapper();
+            services.ConfigurePagination(Configuration);
 
             services.AddCustomIdentity(); //CustomIDentity folder in Infrastracture
 

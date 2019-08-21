@@ -1,16 +1,21 @@
 ﻿@model Web.Models.Category.CategoryViewModel
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Categories";
 }
 
-
-
-
-    
 <div class="top-page-container">
 
     <h1 class="top-page-heading">Categories</h1>
+
+    @{
+        if (User.IsInRole("Moderator") || User.IsInRole("Admin"))
+        {
+        <div class="moderator-admin-options">
+            <a asp-action="Create">Create categroy</a>
+        </div>
+        }
+    }
 
     <div class="pagination-information">
         <p>Current page: @Model.Pagination.CurrentPage</p>
@@ -34,17 +39,16 @@
 
 </div>
 
-
 <div class="image-container">
 
     @foreach (var item in @Model.Categories)
     {
-
     <div class="category-container-item">
-        <img src="@item.Url" alt="Image" />
+        <a asp-action="Edit" asp-route-categoryId="@item.Id">
+            <img src="@item.Url" alt="Image" />
+        </a>
         <h1 class="category-heading-place">@item.Name</h1>
     </div>
-
     }
 
 </div>

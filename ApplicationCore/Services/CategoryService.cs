@@ -11,26 +11,11 @@ using System.Threading.Tasks;
 
 namespace ApplicationCore.Services
 {
-    public class CategoryService : ICategoryService, IPaginationService
+    public class CategoryService : ICategoryService
     {
         protected readonly IAsyncRepository<Category> repository;
         protected readonly IUniqueStringGenerator generator;
         protected readonly IPaginationMaker maker;
-
-        public virtual int PageSize
-        {
-            get => 9;
-        }
-
-        public int Skip(int currentPage)
-        {
-            if (currentPage < 1)
-            {
-                throw new PaginationException("Current page needs to be greater then 0");
-            }
-
-            return (currentPage - 1) * PageSize;
-        }
 
         public CategoryService(IAsyncRepository<Category> repository,
             IUniqueStringGenerator generator,
@@ -46,21 +31,30 @@ namespace ApplicationCore.Services
         /// </summary>
         /// <param name="page">current page</param>
         /// <param name="searchQuery">search query</param>
-        /// <returns>Instnace of PaginationResult</returns>
-        public virtual async Task<IPaginationModel<Category>> GetCategories(int? page, string searchQuery)
+        /// <param name="pageSize">pageSize parametar is fixed(user cant change it) 
+        /// in this case so we dont need to check if pagesize is negative</param>
+        /// <returns>Instnace of IPaginationModel</returns>
+        public virtual async Task<IPaginationModel<Category>> GetCategoriesAsync(int? page, string searchQuery, int pageSize)
         {
+            //Validate input
             int currentPage = page ?? 1;
-            string search = searchQuery ?? string.Empty;
+            string search = searchQuery ?? string.Empty; 
 
-            var firstSpecification = new CategorySpecification(searchQuery ?? "");
+            //Get number of instances from database that containts specific text
+            var firstSpecification = new CategorySpecification(search);
             var numberOfCategories = await repository.CountAsync(firstSpecification);
 
-            currentPage = maker.CheckPageLimits(currentPage, numberOfCategories, PageSize); //is requested page valid ?
+            //Is requested page valid ?
+            currentPage = maker.CheckPageLimits(currentPage, numberOfCategories, pageSize);
 
-            var secondSpecification = new CategorySpecification(Skip(currentPage), PageSize, searchQuery ?? "");
+            //Get required instances from database
+            int skip = maker.Skip(currentPage, pageSize);
+            int take = pageSize;
+            var secondSpecification = new CategorySpecification(skip, take, search);
             var listOfCategories = await repository.ListAsync(secondSpecification);
 
-            var pgOptions = new PaginationOptions(currentPage, numberOfCategories, PageSize);
+            //Return instance of IPaginationModel
+            var pgOptions = new PaginationOptions(currentPage, numberOfCategories, pageSize);
             return maker.PreparePaginationModel(listOfCategories, pgOptions);
         }
 
@@ -83,12 +77,15 @@ namespace ApplicationCore.Services
 
             var serviceResult = new RequestResult<string>();
 
+            string newUniqueImageName = generator.GenerateUniqueString().Replace("-", "");
+            string originalFileExtension = Path.GetExtension(imageName);
             var newCategoryInstance = new Category
             {
                 Name = categoryName,
-                Url = string.Concat(generator.GenerateUniqueString().Replace("-", ""), Path.GetExtension(imageName)),
+                Url = string.Concat(newUniqueImageName, originalFileExtension)
             };
 
+            //TODO - name of category should be unique
             var (instance, error) = await repository.AddAsync(newCategoryInstance);
             if (!string.IsNullOrEmpty(error))
             {
@@ -96,6 +93,21 @@ namespace ApplicationCore.Services
             }
 
             return serviceResult.GoodRequest(instance.Url);
+        }
+
+        /// <summary>
+        /// Get specific category by id
+        /// </summary>
+        /// <param name="id">id of category</param>
+        /// <returns>Instance of Category</returns>
+        public virtual async Task<Category> GetCategoryAsync(int id)
+        {
+            var repositoryResult = await repository.GetByIdAsync(id);
+            if(repositoryResult == null)
+            {
+                throw new InvalidRequest("Selected category doesn't exist");
+            }
+            return repositoryResult;
         }
     }
 }

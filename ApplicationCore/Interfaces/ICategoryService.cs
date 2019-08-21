@@ -7,7 +7,8 @@ namespace ApplicationCore.Interfaces
 {
     public interface ICategoryService
     {
-        Task<IPaginationModel<Category>> GetCategories(int? page, string searchQuery);
+        Task<IPaginationModel<Category>> GetCategoriesAsync(int? page, string searchQuery, int pageSize);
         Task<ServiceResult<string>> CreateNewCategoryAsync(string categoryName, string imageName);
+        Task<Category> GetCategoryAsync(int id);
     }
 }

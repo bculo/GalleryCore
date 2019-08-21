@@ -22,7 +22,9 @@ namespace Web.Configuration
             CreateMap<RegistrationModel, GalleryUser>();
             CreateMap<IAuthProperties, AuthenticationProperties>();
 
+            //Category section
             CreateMap<Category, CategoryModel>();
+            CreateMap<Category, EditCategoryModel>();
             CreateMap<IPaginationModel<Category>, CategoryViewModel>()
                 .ForMember(dest => dest.Categories, opt => opt.MapFrom(src => src.Data))
                 .ForMember(dest => dest.Pagination, opt => opt.MapFrom(

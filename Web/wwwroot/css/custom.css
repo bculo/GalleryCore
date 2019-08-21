@@ -50,7 +50,8 @@
 }
 
 .pagination-pages-list input {
-    margin: 10px 3px;
+    margin-top: 10px;
+    margin-right: 3px;
     background: #3498db;
     width: 30px;
     padding: 4px 0;
@@ -81,6 +82,7 @@
 
 /* IMAGE CONTAINER */
 .image-container {
+    margin: 30px 0px;
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
@@ -90,15 +92,15 @@
 .category-container-item {
     position: relative;
     margin: 25px 25px;
-    height: 300px;
-    width: 300px;
+    height: 250px;
+    width: 250px;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     transition: .5s;
 }
 
 .category-container-item img {
-    height: 300px;
-    width: 300px;
+    height: 250px;
+    width: 250px;
 }
 
 .category-heading-place {
@@ -106,8 +108,8 @@
     top: 85%;
     left: -5%;
     padding: 3px 0px;
-    width: 300px;
-    font-size: 25px;
+    width: 250px;
+    font-size: 22px;
     text-align: center;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     background-color: whitesmoke;
@@ -117,4 +119,21 @@
     transform: scale(1.1);
     box-shadow: 0 6px 14px 0 rgba(0, 0, 0, 0.30), 0 10px 28px 0 rgba(0, 0, 0, 0.26);
     cursor: pointer;
+}
+
+/* MODERATOR AND ADMIN OPTIONS */
+.moderator-admin-options{
+    display: flex;
+    justify-content: center;
+}
+
+.moderator-admin-options a {
+    margin: 5px 5px;
+    background: #3498db;
+    width: auto;
+    padding: 4px 10px;
+    border-radius: 3px;
+    border-width: 0px;
+    color: white;
+    text-decoration: none;
 }

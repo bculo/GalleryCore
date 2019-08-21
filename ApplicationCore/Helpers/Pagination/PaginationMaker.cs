@@ -75,5 +75,10 @@ namespace ApplicationCore.Helpers.Pagination
 
             return pagModel;
         }
+
+        public int Skip(int currentPage, int pageSize)
+        {
+            return (currentPage - 1) * pageSize;
+        }
     }
 }

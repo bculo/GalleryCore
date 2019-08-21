@@ -14,5 +14,7 @@ namespace ApplicationCore.Helpers.Pagination
             where DataType : class;
 
         int CheckPageLimits(int currentPage, int numberOfInstances, int pageSize, int lowestLimit = 1);
+
+        int Skip(int currentPage, int pageSize);
     }
 }
