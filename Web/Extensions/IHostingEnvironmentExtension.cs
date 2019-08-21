@@ -12,7 +12,7 @@ namespace Web.Extensions
 
         public static string CategoryFolder
         {
-            get => Path.Combine("Files", "Category");
+            get => Path.Combine("/", "Files", "Category");
         }
 
         public static string GetFullImagesPath(this IHostingEnvironment environment)
@@ -22,7 +22,7 @@ namespace Web.Extensions
 
         public static string ImagesFolder
         {
-            get => Path.Combine("Files", "Images");
+            get => Path.Combine("/", "Files", "Images");
         }
     }
 }

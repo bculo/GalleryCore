@@ -1,25 +1,43 @@
 ﻿@model Web.Models.Category.EditCategoryModel
 
-<h4>Edit</h4>
+<h4>Edit category</h4>
 
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Edit" enctype="multipart/form-data">
+        @if (!ViewContext.ModelState.IsValid)
+        {
+            <div class="alert alert-danger">
+                <div asp-validation-summary="All"></div>
+            </div>
+        }
+
+        <form asp-action="Edit" id="form" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <input asp-for="Id" class="form-control" />
                 <span asp-validation-for="Id" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <input asp-for="Url" class="form-control" />
-                <span asp-validation-for="Url" class="text-danger"></span>
-            </div>
-            <div class="form-group">
                 <label asp-for="Name" class="control-label"></label>
                 <input asp-for="Name" class="form-control" />
                 <span asp-validation-for="Name" class="text-danger"></span>
             </div>
+
+            <!-- Show current category image -->
+            <div class="form-group">
+                <label asp-for="Url" class="control-label"></label>
+                <div class="category-container-item">
+                    <img src="@Model.Url" alt="Image" />
+                </div>
+            </div>
+
+            <div class="form-group" id="@string.Concat(nameof(Model.CategoryImage), "-div")">
+                <label asp-for="CategoryImage" class="control-label"></label>
+                <input asp-for="CategoryImage" type="file" id="@nameof(Model.CategoryImage)" class="form-control" />
+                <span asp-validation-for="CategoryImage" class="text-danger"></span>
+            </div>
+
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>
@@ -31,3 +49,19 @@
     <a asp-action="Index">Back to Categories</a>
 </div>
 
+@section Scripts{
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+    <script src="~/js/drag-and-drop.js"></script>
+    <script src="~/js/file-upload.js"></script>
+    <script src="~/js/category-edit.js"></script>
+    <script>
+        var settings = {
+            formId: "form",
+            redirectUrl: '@Url.Action("Index", "Category")',
+            uploadUrl: '@Url.Action("CreateAjax", "Category")',
+            nameInputId: '@nameof(Model.Name)',
+            categoryImageDivId: '@string.Concat(nameof(Model.CategoryImage), "-div")',
+            categoryImageInputId: '@nameof(Model.CategoryImage)'
+        }
+    </script>
+}

@@ -13,5 +13,10 @@ namespace Web.Extensions
                 model.Url = Path.Combine(categoryImagesLocation, model.Url);
             }
         }
+
+        public static void GetFullCategoryPath(this EditCategoryModel model, string categoryImagesLocation)
+        {
+            model.Url = Path.Combine(categoryImagesLocation, model.Url);
+        }
     }
 }

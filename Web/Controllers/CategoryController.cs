@@ -3,6 +3,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using System.IO;
 using System.Threading.Tasks;
 using Web.Configuration;
 using Web.Extensions;
@@ -13,6 +14,7 @@ using Web.Models.Category;
 namespace Web.Controllers
 {
     [ErrorFilter]
+    [Route("Category")]
     public class CategoryController : Controller, IControllerInformation
     {
         private readonly IMapper mapper;
@@ -55,14 +57,15 @@ namespace Web.Controllers
         #region Edit section
 
         [HttpGet]
-        [Route("/Edit/{categoryId}")]
+        [Route("Edit/{categoryId}")]
         public virtual async Task<IActionResult> Edit(int categoryId)
         {
             //Get category
             var serviceResult = await service.GetCategoryAsync(categoryId);
 
-            //Map Category to CategoryModel
+            //Map Category to CategoryModel and set correct image url
             var categoryModel = mapper.Map<EditCategoryModel>(serviceResult);
+            categoryModel.GetFullCategoryPath(IHostingEnvironmentExtension.CategoryFolder);
 
             //Display category model
             return View(categoryModel);
@@ -71,8 +74,9 @@ namespace Web.Controllers
         #endregion
 
         #region Create section
-
+    
         [HttpGet]
+        [Route("Create")]
         public virtual IActionResult Create() => View();
 
         /// <summary>
