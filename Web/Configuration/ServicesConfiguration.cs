@@ -1,4 +1,5 @@
 ﻿using ApplicationCore.Helpers.Generator;
+using ApplicationCore.Helpers.Images;
 using ApplicationCore.Helpers.Pagination;
 using ApplicationCore.Interfaces;
 using ApplicationCore.Services;
@@ -25,6 +26,7 @@ namespace Web.Configuration
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<IPaginationMaker, PaginationMaker>();
             services.AddTransient<IUniqueStringGenerator, GuidStringGenerator>();
+            services.AddTransient<IImageNameGenerator, ImageNameGenerator>();
 
             //Infrastracture project
             services.AddScoped(typeof(ISpecificationEvaluator<>), typeof(EfSpecificationEvaluator<>));

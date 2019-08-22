@@ -8,6 +8,7 @@ my.viewname = {
         my.redirectUrl = settings.redirectUrl;
 
         //Selectors part
+        my.submitFormButtonSelector = "#".concat(settings.submitFormButtonId);
         my.categoryImageDivSelector = "#".concat(settings.categoryImageDivId);
         my.formSelector = "#".concat(settings.formId);
         my.categoryImageSelector = "#".concat(settings.categoryImageInputId);
@@ -25,7 +26,7 @@ $(document).ready(function () {
     let token = $('input[name="__RequestVerificationToken"]').val();
     upload.addItem("__RequestVerificationToken", token);
 
-    $("#submitForm").click(submitFile);
+    $(my.submitFormButtonSelector).click(submitFile);
 });
 
 function prepareForDragAndDrop() {
@@ -53,11 +54,11 @@ function submitFile(e) {
 
 function uploadResult(result) {
     if (!result.status) {
+        let form = $(my.formSelector);
         upload.removeItem(my.nameInputId);
         upload.removeItem(my.categoryImageInputId);
 
-        //TODO
-        //Display error
+        $("<p> Problem with adding category </p>").insertBefore(form);
     }
     else {
         let form = $(my.formSelector);

@@ -239,7 +239,7 @@ namespace Infrastructure.CustomIdentity.EntityFramework
                 await context.SaveChangesAsync();
                 return user;
             }
-            catch(Exception e)
+            catch
             {
                 return null;
             }

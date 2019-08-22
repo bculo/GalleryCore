@@ -9,7 +9,7 @@ namespace Web.Models.Category
     {
         [Required]
         [HiddenInput(DisplayValue = false)]
-        public string Id { get; set; }
+        public int Id { get; set; }
 
         [Display(Name = "Current image")]
         [HiddenInput(DisplayValue = false)]
@@ -21,7 +21,7 @@ namespace Web.Models.Category
 
         [Display(Name = "Choose new image for category")]
         [DataType(DataType.Upload)]
-        [FileExtension("jpg,png,jpeg", ErrorMessage = "Wrong file type!")]
+        [FileExtension("jpg,png,jpeg", nullValuePossible: true, ErrorMessage = "Wrong file type!")]
         public IFormFile CategoryImage { get; set; }
     }
 }

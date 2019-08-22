@@ -1,6 +1,7 @@
 ﻿using ApplicationCore.Entities;
 using ApplicationCore.Exceptions;
 using ApplicationCore.Helpers.Generator;
+using ApplicationCore.Helpers.Images;
 using ApplicationCore.Helpers.Pagination;
 using ApplicationCore.Helpers.Service;
 using ApplicationCore.Interfaces;
@@ -14,11 +15,11 @@ namespace ApplicationCore.Services
     public class CategoryService : ICategoryService
     {
         protected readonly IAsyncRepository<Category> repository;
-        protected readonly IUniqueStringGenerator generator;
+        protected readonly IImageNameGenerator generator;
         protected readonly IPaginationMaker maker;
 
         public CategoryService(IAsyncRepository<Category> repository,
-            IUniqueStringGenerator generator,
+            IImageNameGenerator generator,
             IPaginationMaker maker)
         {
             this.repository = repository;
@@ -63,7 +64,7 @@ namespace ApplicationCore.Services
         /// </summary>
         /// <param name="categoryName">name of category</param>
         /// <returns>unique image name</returns>
-        public virtual async Task<ServiceResult<string>> CreateNewCategoryAsync(string categoryName, string imageName)
+        public virtual async Task<ServiceResult<Category>> CreateNewCategoryAsync(string categoryName, string imageName)
         {
             if (string.IsNullOrEmpty(categoryName))
             {
@@ -75,14 +76,12 @@ namespace ApplicationCore.Services
                 throw new ArgumentNullException(nameof(imageName));
             }
 
-            var serviceResult = new RequestResult<string>();
+            var serviceResult = new RequestResult<Category>();
 
-            string newUniqueImageName = generator.GenerateUniqueString().Replace("-", "");
-            string originalFileExtension = Path.GetExtension(imageName);
             var newCategoryInstance = new Category
             {
                 Name = categoryName,
-                Url = string.Concat(newUniqueImageName, originalFileExtension)
+                Url = generator.GetUniqueImageName(imageName)
             };
 
             //TODO - name of category should be unique
@@ -92,7 +91,7 @@ namespace ApplicationCore.Services
                 return serviceResult.BadRequest("Problem with adding new category to database, please try again");
             }
 
-            return serviceResult.GoodRequest(instance.Url);
+            return serviceResult.GoodRequest(instance);
         }
 
         /// <summary>
@@ -108,6 +107,50 @@ namespace ApplicationCore.Services
                 throw new InvalidRequest("Selected category doesn't exist");
             }
             return repositoryResult;
+        }
+
+        /// <summary>
+        /// Update category
+        /// </summary>
+        /// <param name="id">category id</param>
+        /// <param name="name">category name</param>
+        /// <param name="fileName">categry image url</param>
+        /// <returns>Instnace of ServiceResult</returns>
+        public virtual async Task<ServiceResult<(string oldImageUrl, Category updatedCategory)>> UpdateCategoryAsync(int id, string name, string fileName)
+        {
+            var existingCategory = await repository.GetByIdAsync(id);
+            if(existingCategory == null) //aditional check for category id
+            {
+                throw new InvalidRequest($"Category with id = {id} doesn't exist");
+            }
+
+            if (string.IsNullOrEmpty(name))
+            {
+                throw new ArgumentNullException(nameof(name));
+            }
+
+            if(existingCategory.Name != name) //Change name
+            {
+                existingCategory.Name = name;
+            }
+
+            string oldUrl = existingCategory.Url;
+            if (!string.IsNullOrEmpty(fileName) && existingCategory.Url != fileName) //Change image url
+            {
+                existingCategory.Url = generator.GetUniqueImageName(fileName);
+            }
+
+            var serviceResult = new RequestResult<(string oldImage, Category updatedCategory)>();
+
+            var updateResult = await repository.UpdateAsync(existingCategory);
+            if (updateResult)
+            {
+                return serviceResult.GoodRequest((oldUrl, existingCategory));
+            }
+            else
+            {
+                return serviceResult.BadRequest("Something went wrong, plese try again");
+            }
         }
     }
 }
