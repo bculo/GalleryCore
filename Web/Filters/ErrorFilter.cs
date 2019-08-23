@@ -13,26 +13,26 @@ namespace Web.Filters
         {
             if (context.Exception is ArgumentNullException)
             {
-                RedirectOnException(context.Result, "Error", "AppBadRequest");
+                RedirectOnException(context, "Error", "AppBadRequest");
             }
 
             if (context.Exception is InvalidRequest)
             {
-                RedirectOnException(context.Result, "Error", "AppBadRequest");
+                RedirectOnException(context, "Error", "AppBadRequest");
             }
 
             else if(context.Exception is InvalidUserException)
             {
-                RedirectOnException(context.Result, "Authentication", "Login");
+                RedirectOnException(context, "Authentication", "Login");
             }
 
             base.OnException(context);
         }
 
-        private void RedirectOnException(IActionResult result, string controllerName, string actionName)
+        private void RedirectOnException(ExceptionContext context, string controllerName, string actionName)
         {
-            result = new RedirectToRouteResult(
-                new RouteValueDictionary(new { controller = "Error", action = "AppBadRequest" })
+            context.Result = new RedirectToRouteResult(
+                new RouteValueDictionary(new { controller = controllerName, action = actionName })
             );
         }
     }

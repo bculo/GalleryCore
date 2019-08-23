@@ -12,5 +12,6 @@ namespace ApplicationCore.Interfaces
         Task<ServiceResult<Category>> CreateNewCategoryAsync(string categoryName, string imageName);
         Task<Category> GetCategoryAsync(int id);
         Task<ServiceResult<(string oldImageUrl, Category updatedCategory)>> UpdateCategoryAsync(int id, string name, string fileName);
+        Task<bool> DeleteCategoryAsync(int categoryId);
     }
 }

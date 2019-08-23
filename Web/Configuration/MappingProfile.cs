@@ -25,6 +25,7 @@ namespace Web.Configuration
             //Category section
             CreateMap<Category, CategoryModel>();
             CreateMap<Category, EditCategoryModel>();
+            CreateMap<Category, DeleteCategoryModel>();
             CreateMap<IPaginationModel<Category>, CategoryViewModel>()
                 .ForMember(dest => dest.Categories, opt => opt.MapFrom(src => src.Data))
                 .ForMember(dest => dest.Pagination, opt => opt.MapFrom(

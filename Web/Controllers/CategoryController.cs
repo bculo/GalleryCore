@@ -1,5 +1,4 @@
-﻿using ApplicationCore.Entities;
-using ApplicationCore.Interfaces;
+﻿using ApplicationCore.Interfaces;
 using AutoMapper;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -127,6 +126,59 @@ namespace Web.Controllers
         #endregion
 
         #region Delete section
+
+        [HttpGet]
+        [Route("Delete/{categoryId}")]
+        public virtual async Task<IActionResult> Delete([FromRoute] int categoryId)
+        {
+            //Get category
+            var serviceResult = await service.GetCategoryAsync(categoryId);
+
+            //Map Category to DeleteCategoryModel and set correct image url
+            var categoryModel = mapper.Map<DeleteCategoryModel>(serviceResult);
+
+            //Display model
+            return View(categoryModel);
+        }
+
+        [HttpPost]
+        [ValidateModel]
+        [ValidateAntiForgeryToken]
+        [Route("Delete/{categoryId}")]
+        public virtual async Task<IActionResult> Delete(DeleteCategoryModel model)
+        {
+            var serviceResult = await service.DeleteCategoryAsync(model.Id.Value);
+
+            if (!serviceResult)
+            {
+                return View(model);
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        /*
+         * TESTING SECTION
+         * WHEN WE HAVE TWO METHODS WITH SAME SIGNATURE USE ActionName attribute
+        [HttpPost]
+        [ValidateModel]
+        [Route("Delete")]
+        [Route("Delete/{categoryId}")]
+        [ValidateAntiForgeryToken]
+        [ActionName(nameof(Delete))]
+        public virtual async Task<IActionResult> DeletePost([FromForm] int id)
+        {
+            var serviceResult = await service.DeleteCategoryAsync(id);
+
+            if (!serviceResult)
+            {
+                //GET MODEL WITH ID AND PASS IT TO VIEW
+                return View();
+            }
+            
+            return RedirectToAction(nameof(Index));
+        }
+        */
 
         #endregion
 

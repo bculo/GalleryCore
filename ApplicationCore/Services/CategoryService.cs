@@ -1,13 +1,11 @@
 ﻿using ApplicationCore.Entities;
 using ApplicationCore.Exceptions;
-using ApplicationCore.Helpers.Generator;
 using ApplicationCore.Helpers.Images;
 using ApplicationCore.Helpers.Pagination;
 using ApplicationCore.Helpers.Service;
 using ApplicationCore.Interfaces;
 using ApplicationCore.Specifications;
 using System;
-using System.IO;
 using System.Threading.Tasks;
 
 namespace ApplicationCore.Services
@@ -18,7 +16,8 @@ namespace ApplicationCore.Services
         protected readonly IImageNameGenerator generator;
         protected readonly IPaginationMaker maker;
 
-        public CategoryService(IAsyncRepository<Category> repository,
+        public CategoryService(
+            IAsyncRepository<Category> repository,
             IImageNameGenerator generator,
             IPaginationMaker maker)
         {
@@ -151,6 +150,22 @@ namespace ApplicationCore.Services
             {
                 return serviceResult.BadRequest("Something went wrong, plese try again");
             }
+        }
+
+        /// <summary>
+        /// Delete category with specific Id
+        /// </summary>
+        /// <param name="categoryId">category id</param>
+        /// <returns>true if category is deleted, otherwise return false</returns>
+        public virtual async Task<bool> DeleteCategoryAsync(int categoryId)
+        {
+            var existingCategory = await repository.GetByIdAsync(categoryId);
+            if (existingCategory == null) //aditional check for category id
+            {
+                throw new InvalidRequest($"Category with id = {categoryId} doesn't exist");
+            }
+
+            return await repository.DeleteAsync(existingCategory);
         }
     }
 }
