@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using ApplicationCore.Helpers.Path;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using Web.Filters;
 
 namespace Web.Models.Category
 {
-    public class EditCategoryModel
+    public class EditCategoryModel : IPathUser
     {
         [Required]
         [HiddenInput(DisplayValue = false)]

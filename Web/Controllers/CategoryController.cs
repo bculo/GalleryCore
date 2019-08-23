@@ -1,4 +1,5 @@
-﻿using ApplicationCore.Interfaces;
+﻿using ApplicationCore.Extensions;
+using ApplicationCore.Interfaces;
 using AutoMapper;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -45,7 +46,7 @@ namespace Web.Controllers
             //Prepare CategoryViewModel instance
             var categoryView = mapper.Map<CategoryViewModel>(paginationModel);
             categoryView.SearchCategory = searchQuery;
-            categoryView.Categories.GetFullCategoryPaths(IHostingExtension.CategoryFolderDisplay);
+            categoryView.Categories.GetPaths(IHostingExtension.CategoryFolderDisplay);
 
             //Display CategoryViewModel
             return View(categoryView);
@@ -57,14 +58,14 @@ namespace Web.Controllers
 
         [HttpGet]
         [Route("Edit/{categoryId}")]
-        public virtual async Task<IActionResult> Edit(int categoryId)
+        public virtual async Task<IActionResult> Edit([FromRoute] int categoryId)
         {
             //Get category
             var serviceResult = await service.GetCategoryAsync(categoryId);
 
             //Map Category to CategoryModel and set correct image url
             var categoryModel = mapper.Map<EditCategoryModel>(serviceResult);
-            categoryModel.GetFullCategoryPath(IHostingExtension.CategoryFolderDisplay);
+            categoryModel.GetPaths(IHostingExtension.CategoryFolderDisplay);
 
             //Display category model
             return View(categoryModel);
@@ -91,7 +92,7 @@ namespace Web.Controllers
 
                 //Prepare EditCategoryModel instance
                 var categoryModel = mapper.Map<EditCategoryModel>(category);
-                categoryModel.GetFullCategoryPath(IHostingExtension.CategoryFolderDisplay);
+                categoryModel.GetPaths(IHostingExtension.CategoryFolderDisplay);
 
                 return View(categoryModel);
             }

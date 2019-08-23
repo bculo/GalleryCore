@@ -12,7 +12,7 @@ namespace ApplicationCore.Helpers.Images
         public string GetUniqueImageName(string fileNameWithExtension)
         {
             string newUniqueImageName = generator.GenerateUniqueString().Replace("-", "");
-            string originalFileExtension = Path.GetExtension(fileNameWithExtension);
+            string originalFileExtension = System.IO.Path.GetExtension(fileNameWithExtension);
             return string.Concat(newUniqueImageName, originalFileExtension);
         }
     }

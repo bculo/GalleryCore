@@ -1,11 +1,11 @@
 ﻿using ApplicationCore.Helpers.Path;
 
-namespace Web.Models.Category
+namespace Web.Models.Image
 {
-    public class CategoryModel : IPathUser
+    public class ImageBasicModel : IPathUser
     {
         public int Id { get; set; }
+        public string Description { get; set; }
         public string Url { get; set; }
-        public string Name { get; set; }
     }
 }

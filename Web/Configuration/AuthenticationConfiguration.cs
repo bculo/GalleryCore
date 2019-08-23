@@ -68,8 +68,6 @@ namespace Web.Configuration
                 options.ClientId = configuration["Authentication:Google:AppId"];
                 options.ClientSecret = configuration["Authentication:Google:AppSecret"];
             });
-
-            //Read information from HttpContext => await HttpContext.AuthenticateAsync("ExternalLogin");
         }
 
         #endregion

@@ -27,6 +27,7 @@ namespace Web.Configuration
             services.AddScoped<IPaginationMaker, PaginationMaker>();
             services.AddTransient<IUniqueStringGenerator, GuidStringGenerator>();
             services.AddTransient<IImageNameGenerator, ImageNameGenerator>();
+            services.AddScoped<IImageService, ImageService>();
 
             //Infrastracture project
             services.AddScoped(typeof(ISpecificationEvaluator<>), typeof(EfSpecificationEvaluator<>));

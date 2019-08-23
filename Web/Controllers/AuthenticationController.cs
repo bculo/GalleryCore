@@ -32,6 +32,8 @@ namespace Web.Controllers
             this.mapper = mapper;
         }
 
+        #region Registration section
+
         [HttpGet]
         [ValidateUserLogedIn]
         public virtual IActionResult Registration() => View();
@@ -59,7 +61,32 @@ namespace Web.Controllers
             ModelState.FillWithErrors(serviceResult.Errors);
             return View(model);
         }
-         
+
+        [HttpGet]
+        [ValidateUserLogedIn]
+        public virtual async Task<IActionResult> Confirm(string ident, string tok)
+        {
+            //Verify registration token
+            var serviceResult = await authService.VerifyConfirmationTokenAsync(ident, tok);
+
+            if (serviceResult.Success)
+            {
+                //Token successfuly confirmed
+                ViewBag.Message = "Successful email confirmation";
+            }
+            else
+            {
+                //Something went wrong
+                ModelState.FillWithErrors(serviceResult.Errors);
+            }
+
+            return View();
+        }
+
+        #endregion
+
+        #region Delete section
+
         [HttpGet]
         [ValidateUserLogedIn]
         public virtual IActionResult Login() => View();
@@ -84,26 +111,9 @@ namespace Web.Controllers
             return View(model);
         }
 
-        [HttpGet]
-        [ValidateUserLogedIn]
-        public virtual async Task<IActionResult> Confirm(string ident, string tok)
-        {
-            //Verify registration token
-            var serviceResult = await authService.VerifyConfirmationTokenAsync(ident, tok);
+        #endregion
 
-            if (serviceResult.Success)
-            {
-                //Token successfuly confirmed
-                ViewBag.Message = "Successful email confirmation";
-            }
-            else
-            {
-                //Something went wrong
-                ModelState.FillWithErrors(serviceResult.Errors);
-            }
-
-            return View();
-        }
+        #region Password recovery section
 
         [HttpGet]
         [ValidateUserLogedIn]
@@ -169,6 +179,10 @@ namespace Web.Controllers
             return View();
         }
 
+        #endregion
+
+        #region Logout section
+
         [HttpGet]
         public virtual async Task<IActionResult> Logout()
         {
@@ -178,6 +192,10 @@ namespace Web.Controllers
             //redirect user to home page
             return RedirectToAction("Index", "Home");
         }
+
+        #endregion
+
+        #region Social providers Login / Registration
 
         [HttpGet]
         [ValidateUserLogedIn]
@@ -210,5 +228,7 @@ namespace Web.Controllers
 
             return RedirectToAction("Index", "Home");
         }
+
+        #endregion
     }
 }

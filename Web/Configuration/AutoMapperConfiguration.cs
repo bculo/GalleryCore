@@ -6,7 +6,7 @@ namespace Web.Configuration
     public static class AutoMapperConfiguration
     {
         /// <summary>
-        /// Configure automapper
+        /// Configure automapper singleton instnace
         /// </summary>
         /// <param name="services"></param>
         public static void ConfigureAutoMapper(this IServiceCollection services)
