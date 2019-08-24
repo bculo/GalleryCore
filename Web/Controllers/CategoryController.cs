@@ -213,7 +213,7 @@ namespace Web.Controllers
             //Save image to given location if everything alright
             await model.CategoryImage.SaveImageAsync(environment.GetFullCategoryPath(), serviceResult.Result.Url);
 
-            return RedirectToAction(nameof(Index), Name);
+            return RedirectToAction(nameof(Index));
         }
 
         /// <summary>

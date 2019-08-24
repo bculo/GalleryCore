@@ -77,11 +77,14 @@ namespace Web.Controllers
 
         #region Create section
 
-        /*
         [HttpGet]
-        [Route("Create")]
-        public virtual async Task<IActionResult> Create() => View();
+        [Route("Create/{categoryId}")]
+        public virtual IActionResult Create([FromRoute] int categoryId)
+        {
+            return View(new CreateImageModel { CategoryId = categoryId });
+        }
 
+        /*
         [HttpGet]
         [ValidateModel]
         [Route("Create")]
