@@ -18,8 +18,8 @@ namespace ApplicationCore.Entities
         public int CategoryId { get; set; }
         public Category Category { get; set; }
 
-        public IEnumerable<Tag> Tags { get; set; }
-        public IEnumerable<Comment> Comments { get; set; }
-        public IEnumerable<Like> Likes { get; set; }
+        public ICollection<Tag> Tags { get; set; }
+        public ICollection<Comment> Comments { get; set; }
+        public ICollection<Like> Likes { get; set; }
     }
 }

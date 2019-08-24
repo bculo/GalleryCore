@@ -7,6 +7,7 @@ using ApplicationCore.Interfaces;
 using ApplicationCore.Specifications;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace ApplicationCore.Services
@@ -95,9 +96,64 @@ namespace ApplicationCore.Services
             return pgMaker.PreparePaginationModel(displayRecords, pgOptions);
         }
 
+        /// <summary>
+        /// Create new image
+        /// </summary>
+        /// <param name="categoryId">image category</param>
+        /// <param name="description">image description</param>
+        /// <param name="imageFile">image name</param>
+        /// <param name="userId">uploder id</param>
+        /// <param name="tags">image tags</param>
+        /// <returns>Instance of ServiceResult</returns>
         public virtual async Task<ServiceResult<Image>> SaveNewImageAsync(int categoryId, string description, string imageFile, string userId, List<string> tags)
         {
-            throw new NotImplementedException();
+            //If category doesnt exist, throw InvalidRequest exception
+            if (await categoryRepo.GetByIdAsync(categoryId) == null)
+            {
+                throw new InvalidRequest($"Category with id = {categoryId} doesnt exist");
+            }
+
+            if (string.IsNullOrEmpty(imageFile))
+            {
+                throw new ArgumentNullException(nameof(imageFile));
+            }
+
+            imageFile = generator.GetUniqueImageName(imageFile);
+
+            var newImage = new Image
+            {
+                CategoryId = categoryId,
+                Created = DateTime.Now,
+                Tags = tags.Select(item => new Tag { Description = item }).ToList(),
+                Description = description ?? "",
+                Comments = new List<Comment>(),
+                Likes = new List<Like>(),
+                Url = imageFile,
+                UserId = userId,
+            };
+
+            var serviceResult = new RequestResult<Image>();
+
+            var (instnace, message) = await imageRepo.AddAsync(newImage);
+            if (!string.IsNullOrEmpty(message))
+            {
+                return serviceResult.BadRequest(message);
+            }
+            else
+            {
+                return serviceResult.GoodRequest(instnace);
+            }
+        }
+
+        public virtual async Task<Image> GetImageByIdAsync(int imageId)
+        {
+            var imageSpecification = new ImageSpecification((long) imageId);
+            var imageInstance = await imageRepo.GetSingleInstanceAsync(imageSpecification);
+            if(imageInstance == null)
+            {
+                throw new InvalidRequest();
+            }
+            return imageInstance;
         }
     }
 }

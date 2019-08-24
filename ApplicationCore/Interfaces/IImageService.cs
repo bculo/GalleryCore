@@ -12,5 +12,6 @@ namespace ApplicationCore.Interfaces
         Task<IPaginationModel<Image>> GetImagesByCategoryAsync(int categoryId, int? page, int pageSize, string searchQuery);
         Task<ServiceResult<Image>> SaveNewImageAsync(int categoryId, string description, string imageFile,
             string userId, List<string> tags);
+        Task<Image> GetImageByIdAsync(int imageId);
     }
 }

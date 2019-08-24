@@ -6,6 +6,9 @@ using AutoMapper;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Web.Configuration;
 using Web.Extensions;
@@ -84,25 +87,82 @@ namespace Web.Controllers
             return View(new CreateImageModel { CategoryId = categoryId });
         }
 
-        /*
-        [HttpGet]
+
+        [HttpPost]
         [ValidateModel]
-        [Route("Create")]
         [ValidateAntiForgeryToken]
+        [Route("Create/{categoryId}")]
         public virtual async Task<IActionResult> Create(CreateImageModel model)
         {
+            string fileName = model.Image.FileName;
+            List<string> tags = SeperateTags(model.Tags);
+            //string userId = User.GetUserId();
+            string userId = "114068491279450791564"; //hardcoded user id 
+
+            var serviceResult = await service.SaveNewImageAsync(model.CategoryId, model.Description, fileName, userId, tags);
+            if (serviceResult.Success)
+            {
+                await model.Image.SaveImageAsync(environment.GetFullImagesPath(), serviceResult.Result.Url);
+                return RedirectToAction(nameof(Index), model.CategoryId);
+            }
+
+            ModelState.FillWithErrors(serviceResult.Errors);
             return View(model);
         }
 
-        [HttpGet]
+        [HttpPost]
         [ValidateModel]
-        [Route("Create")]
+        [Route("CreateAjax")]
         [ValidateAntiForgeryToken]
         public virtual async Task<IActionResult> CreateAjax([FromForm] CreateImageModel model)
         {
-            return View(model);
+            string fileName = model.Image.FileName;
+            List<string> tags = SeperateTags(model.Tags);
+            //string userId = User.GetUserId();
+            string userId = "114068491279450791564"; //hardcoded user id 
+
+            var serviceResult = await service.SaveNewImageAsync(model.CategoryId, model.Description, fileName, userId, tags);
+            if (serviceResult.Success)
+            {
+                await model.Image.SaveImageAsync(environment.GetFullImagesPath(), serviceResult.Result.Url);
+                return Json(new { success = true, redirectAction = nameof(Index) });
+            }
+
+            return Json(new { success = false, message = serviceResult.Errors[0] });
         }
-        */
+
+        /// <summary>
+        /// Convert one tag string into list of tags
+        /// Input: "tag1, tag2, tag3" (string)
+        /// Output: [tag1, tag2, tag3] (list)
+        /// </summary>
+        /// <param name="tags">string with tags</param>
+        /// <param name="separator">spliting string with this separator</param>
+        /// <returns>list of tags</returns>
+        public List<string> SeperateTags(string tags, char separator = ',')
+        {
+            if (string.IsNullOrWhiteSpace(tags))
+            {
+                return new List<string>();
+            }
+
+            return tags.Split(new char[] { separator }, StringSplitOptions.RemoveEmptyEntries)
+                .ToList();
+        }
+
+        #endregion
+
+        #region Selected image details
+
+        [HttpGet]
+        [Route("Detail/{imageId}")]
+        public virtual async Task<IActionResult> Detail(int imageId)
+        {
+            var serviceResult = await service.GetImageByIdAsync(imageId);
+            var viewModel = mapper.Map<ImageRichModel>(serviceResult);
+            viewModel.GetPaths(IHostingExtension.ImagesFolderDisplay);
+            return View(viewModel);
+        }
 
         #endregion
     }

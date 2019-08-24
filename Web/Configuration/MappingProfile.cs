@@ -4,6 +4,7 @@ using ApplicationCore.Helpers.Pagination;
 using AutoMapper;
 using Infrastructure.IdentityData;
 using Microsoft.AspNetCore.Authentication;
+using System.Linq;
 using Web.Models;
 using Web.Models.Authentication;
 using Web.Models.Category;
@@ -48,6 +49,10 @@ namespace Web.Configuration
                     TotalItems = src.TotalItems,
                     TotalPages = src.TotalPages
                 }));
+            CreateMap<Image, ImageRichModel>()
+                .ForMember(dest => dest.UploderName, opt => opt.MapFrom(src => src.User.UserName))
+                .ForMember(dest => dest.Tags, opt => opt.MapFrom(src => src.Tags.Select(tag => tag.Description).ToList()))
+                .ForMember(dest => dest.Likes, opt => opt.MapFrom(src => (src.Likes.Count(item => item.Liked) - src.Likes.Count(item => !item.Liked))));
 
         }
     }

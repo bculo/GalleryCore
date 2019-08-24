@@ -40,7 +40,7 @@
     @foreach (var item in @Model.Images)
     {
         <div class="category-container-item">
-            <a asp-action="Edit" asp-route-categoryId="@item.Id">
+            <a asp-action="Detail" asp-route-imageId="@item.Id">
                 <img src="@item.Url" alt="Image" />
             </a>
         </div>

@@ -1,0 +1,36 @@
+﻿@model Web.Models.Image.ImageRichModel
+
+<div class="row">
+    <h4>Image details</h4>
+    <hr />
+    <div class="col-md-4">
+        <div class="form-group">
+            <div class="category-container-item">
+                <img src="@Model.Url" alt="Image" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="Description" class="control-label"></label>
+            <p>@Model.Description</p>
+        </div>
+        <div class="form-group">
+            <label asp-for="UploderName" class="control-label"></label>
+            <p>@Model.UploderName</p>
+        </div>
+        <div class="form-group">
+            <label asp-for="Likes" class="control-label"></label>
+            <p>@Model.Likes</p>
+        </div>
+        <div class="form-group">
+            <label asp-for="Tags" class="control-label"></label>
+            @foreach (var item in Model.Tags)
+            {
+                <p>@item</p>
+            }
+        </div>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index" asp-route-categoryId="@Model.CategoryId">Back to Images</a>
+</div>

@@ -10,7 +10,7 @@ namespace ApplicationCore.Entities
         public string Name { get; set; }
         public string Url { get; set; } //category image
 
-        public IEnumerable<Image> Images { get; set; }
+        public ICollection<Image> Images { get; set; }
 
         public override string ToString() => Name;
     }

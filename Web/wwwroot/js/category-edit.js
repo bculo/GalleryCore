@@ -48,7 +48,14 @@ function submitFile(e) {
         return;
     }
 
-    let file = dragAndDrop.getFile().file;
+    let fileInformation = dragAndDrop.getFile();
+
+    if (!fileInformation) {
+        console.log("Upload file first");
+        return;
+    }
+
+    let file = fileInformation.file;
     let name = $(my.nameInputSelector).val();
 
     upload.addItem(my.nameInputId, name);

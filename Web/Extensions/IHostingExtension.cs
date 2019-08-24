@@ -27,7 +27,7 @@ namespace Web.Extensions
 
         public static string GetFullImagesPath(this IHostingEnvironment environment)
         {
-            return Path.Combine(environment.ContentRootPath, ImagesFolderDisplay);
+            return Path.Combine(environment.ContentRootPath, ImagesFolderSave);
         }
 
         public static string ImagesFolderDisplay

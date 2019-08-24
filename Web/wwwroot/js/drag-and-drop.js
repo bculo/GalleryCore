@@ -89,7 +89,11 @@ function DragAndDrop(insertAfterElementWithId, validFileExtensionsAsArray) {
         file = null;
     }
 
-    this.getFile = function() {
+    this.getFile = function () {
+        if (!file) {
+            return null;
+        }
+
         return file;
     }
 }

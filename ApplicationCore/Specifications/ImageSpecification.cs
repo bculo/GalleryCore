@@ -13,5 +13,13 @@ namespace ApplicationCore.Specifications
         {
             ApplyPaging(skip, take);
         }
+
+        public ImageSpecification(long id) : base(i => i.Id == id)
+        {
+            AddInclude(i => i.Likes);
+            AddInclude(i => i.Tags);
+            AddInclude(i => i.Comments);
+            AddInclude(i => i.User);
+        }
     }
 }

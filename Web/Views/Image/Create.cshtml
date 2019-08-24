@@ -15,11 +15,11 @@
         <form asp-action="Create" enctype="multipart/form-data" id="form">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <input asp-for="CategoryId" class="form-control" />
+                <input asp-for="CategoryId" id="@nameof(Model.CategoryId)" class="form-control" />
                 <span asp-validation-for="CategoryId" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Description" class="control-label"></label>
+                <label asp-for="Description" id="@nameof(Model.Description)" class="control-label"></label>
                 <input asp-for="Description" class="form-control" />
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
@@ -41,6 +41,26 @@
 </div>
 
 <div>
-    <a asp-controller="Category" asp-action="Index">Back to Categories</a>
+    <a asp-controller="Category" asp-action="Index">Back to Images</a>
 </div>
 
+@section Scripts{
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="~/js/drag-and-drop.js"></script>
+    <script src="~/js/file-upload.js"></script>
+    <script src="~/js/image-create.js"></script>
+    <script>
+        var settings =
+        {
+            formId: 'form',
+            redirectUrl: '@Url.Action("Index", "Image")',
+            categoryInputId: '@nameof(Model.CategoryId)',
+            descriptionInputId : '@nameof(Model.Description)',
+            uploadUrl: '@Url.Action("CreateAjax", "Image")',
+            tagsDivId: '@nameof(Model.Tags)',
+            imageUploadDivId: '@nameof(Model.Image)',
+            submitFormButtonId: "submit",
+        }
+        my.viewname.init(settings);
+    </script>
+}

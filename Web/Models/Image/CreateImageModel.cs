@@ -13,6 +13,7 @@ namespace Web.Models.Image
 
         public string Description { get; set; }
 
+        [Display(Name = "Tags (seperate tags using ,)")]
         public string Tags { get; set; }
 
         [Required]
