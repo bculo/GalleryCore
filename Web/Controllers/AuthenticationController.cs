@@ -85,7 +85,7 @@ namespace Web.Controllers
 
         #endregion
 
-        #region Delete section
+        #region Login section
 
         [HttpGet]
         [ValidateUserLogedIn]
