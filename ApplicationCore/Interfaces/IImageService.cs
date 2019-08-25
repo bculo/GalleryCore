@@ -13,5 +13,6 @@ namespace ApplicationCore.Interfaces
         Task<ServiceResult<Image>> SaveNewImageAsync(int categoryId, string description, string imageFile,
             string userId, List<string> tags);
         Task<Image> GetImageByIdAsync(int imageId);
+        Task<(int likes, int dislikes)> LikeImageAsync(long imageid, bool like, string userId);
     }
 }

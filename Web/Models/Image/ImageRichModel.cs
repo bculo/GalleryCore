@@ -14,5 +14,7 @@ namespace Web.Models.Image
         public string Url { get; set; }
         public List<string> Tags { get; set; }
         public int Likes { get; set; }
+        public int Dislikes { get; set; }
+        public List<ImageComment> Comments { get; set; }
     }
 }

@@ -3,6 +3,7 @@ using ApplicationCore.Extensions;
 using ApplicationCore.Helpers.Pagination;
 using ApplicationCore.Interfaces;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -152,16 +153,50 @@ namespace Web.Controllers
 
         #endregion
 
-        #region Selected image details
+        #region Selected image action
 
         [HttpGet]
         [Route("Detail/{imageId}")]
-        public virtual async Task<IActionResult> Detail(int imageId)
+        public virtual async Task<IActionResult> Detail([FromRoute] int imageId)
         {
             var serviceResult = await service.GetImageByIdAsync(imageId);
             var viewModel = mapper.Map<ImageRichModel>(serviceResult);
             viewModel.GetPaths(IHostingExtension.ImagesFolderDisplay);
             return View(viewModel);
+        }
+
+        [HttpPost]
+        [ValidateModel]
+        [Route("LikeAjax")]
+        [ValidateAntiForgeryToken]
+        public virtual async Task<IActionResult> LikeAjax(ImageLike model)
+        {
+            //string userId = User.GetUserId();
+            string userId = "114068491279450791564"; //hardcoded user id 
+            var (likes, dislikes) = await service.LikeImageAsync(model.Id, model.Like, userId);
+            return Json(new { success = true, like = likes, dislike = dislikes });
+        }
+
+        [HttpPost]
+        [ValidateModel]
+        [Route("CommentAjax")]
+        [ValidateAntiForgeryToken]
+        public virtual async Task<IActionResult> CommentAjax(ImageComment model)
+        {
+
+
+            return Json(new { success = true });
+        }
+
+        [HttpPost]
+        [Route("DisplayComment")]
+        [ValidateAntiForgeryToken]
+        public virtual async Task<IActionResult> DisplayComment(int page)
+        {
+            int take = settings.CommentsPageSize;
+
+
+            return Json(new { success = true });
         }
 
         #endregion

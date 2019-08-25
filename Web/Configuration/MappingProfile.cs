@@ -52,7 +52,10 @@ namespace Web.Configuration
             CreateMap<Image, ImageRichModel>()
                 .ForMember(dest => dest.UploderName, opt => opt.MapFrom(src => src.User.UserName))
                 .ForMember(dest => dest.Tags, opt => opt.MapFrom(src => src.Tags.Select(tag => tag.Description).ToList()))
-                .ForMember(dest => dest.Likes, opt => opt.MapFrom(src => (src.Likes.Count(item => item.Liked) - src.Likes.Count(item => !item.Liked))));
+                .ForMember(dest => dest.Likes, opt => opt.MapFrom(src => (src.Likes.Count(item => item.Liked))))
+                .ForMember(dest => dest.Dislikes, opt => opt.MapFrom(src => (src.Likes.Count(item => !item.Liked))))
+                .ForMember(dest => dest.Comments, opt => opt.MapFrom(src => src.Comments));
+
 
         }
     }

@@ -57,7 +57,7 @@ function prepareSectionForTags() {
     //Fill tag section
     $("<p>Tags</p>").appendTo($(my.tagsDivSelector));
     $("<div class='tag-container'></div>").appendTo($(my.tagsDivSelector));
-    $("<input id='single-tag' class='form-control'/>").appendTo($(my.tagsDivSelector));
+    $("<input id='single-tag' class='form-control' placeholder='tag'/>").appendTo($(my.tagsDivSelector));
     $('<br /><input value="Add tag" type="button" id="add-tag" class="btn btn-primary" />').appendTo($(my.tagsDivSelector));
 
     $(my.addTagButtonSelector).click(addTag)

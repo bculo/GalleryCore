@@ -1,4 +1,5 @@
 ﻿using ApplicationCore.Entities;
+using System.Linq;
 
 namespace ApplicationCore.Specifications
 {

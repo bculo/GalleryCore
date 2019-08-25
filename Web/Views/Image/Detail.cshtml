@@ -1,36 +1,97 @@
 ﻿@model Web.Models.Image.ImageRichModel
 
-<div class="row">
-    <h4>Image details</h4>
-    <hr />
-    <div class="col-md-4">
-        <div class="form-group">
-            <div class="category-container-item">
-                <img src="@Model.Url" alt="Image" />
-            </div>
+<h4>Image details</h4>
+<hr />
+<form asp-action="Detail" asp-route-imageId="@Model.Id">
+    <input asp-for="Id" hidden id="@nameof(Model.Id)" />
+</form>
+<div class="content-center">
+
+    <!-- SHOW IMAGE, LIKE AND DISLIKE BUTTONS -->
+    <div class="image-detail-container">
+        <img src="@Model.Url" alt="Image" />
+        <div class="image-detail-options">
+            <a asp-action="Like" id="like" class="vertical">
+                <span class="text-white" id="likeValue">@Model.Likes</span>
+                <img src="~/images/like.svg" />
+            </a>
+            <a asp-action="Dislike" id="dislike" class="vertical">
+                <span class="text-white" id="dislikeValue">@Model.Dislikes</span>
+                <img src="~/images/dislike.svg" />
+            </a>
         </div>
-        <div class="form-group">
-            <label asp-for="Description" class="control-label"></label>
-            <p>@Model.Description</p>
-        </div>
-        <div class="form-group">
-            <label asp-for="UploderName" class="control-label"></label>
-            <p>@Model.UploderName</p>
-        </div>
-        <div class="form-group">
-            <label asp-for="Likes" class="control-label"></label>
-            <p>@Model.Likes</p>
-        </div>
-        <div class="form-group">
-            <label asp-for="Tags" class="control-label"></label>
+    </div>
+
+    <div class="break"></div>
+
+    <!-- SHOW UPLODER -->
+    <div class="image-detail-group">
+        <span class="font-weight-bold">@nameof(Model.UploderName): </span>
+        <span>@Model.UploderName</span>
+    </div>
+
+    <div class="break"></div>
+
+    <!-- SHOW DESCRIPTION -->
+    <div class="image-detail-group">
+        <span class="font-weight-bold">@nameof(Model.Description): </span>
+        <span>@Model.Description</span>
+    </div>
+
+    <div class="break"></div>
+
+    <!-- SHOW TAGS -->
+    <div class="image-detail-group">
+        <span class="font-weight-bold">@nameof(Model.Tags)</span>
+        <div class='tag-container'>
             @foreach (var item in Model.Tags)
             {
-                <p>@item</p>
+                <div class='tag-item'>
+                    @item
+                </div>
             }
         </div>
     </div>
 </div>
 
+<hr />
+<div class="comment-section">
+    @foreach (var item in Model.Comments)
+    {
+        <span class="font-weight-bold">@item.UserName</span>
+        <p>@item.Description</p>
+    }
+    @if (Model.Comments.Count == 0)
+    {
+        <p>0 comments</p>
+    }
+    else
+    {
+        <input asp-action="Comments" type="button" id="loadComments" value="More comments" />
+    }
+</div>
+
 <div>
     <a asp-action="Index" asp-route-categoryId="@Model.CategoryId">Back to Images</a>
 </div>
+
+@section Scripts{
+    <script src="~/js/image-detail.js"></script>
+    <script>
+        var settings = {
+            imageId: "@nameof(Model.Id)",
+
+            commentUrl: '@Url.Action("CommentAjax", "Image")',
+            commentInputId: "commentInput",
+            commentButtonId: "commentButton",
+
+            likeButtonId: "like",
+            likeValueId: "likeValue",
+            likeUrl: '@Url.Action("LikeAjax", "Image")',
+
+            dislikeValueId: "dislikeValue",
+            dislikeButtonId: "dislike",
+        }
+        my.viewname.init(settings);
+    </script>
+}

@@ -15,13 +15,13 @@ namespace ApplicationCore.Services
     public class ImageService : IImageService
     {
         protected readonly IAsyncRepository<Category> categoryRepo;
-        protected readonly IAsyncRepository<Image> imageRepo;
+        protected readonly IImageRepository imageRepo;
         protected readonly IImageNameGenerator generator;
         protected readonly IPaginationMaker pgMaker;
 
         public ImageService(
             IAsyncRepository<Category> categoryRepo,
-            IAsyncRepository<Image> imageRepo,
+            IImageRepository imageRepo,
             IImageNameGenerator generator,
             IPaginationMaker maker)
         {
@@ -145,15 +145,44 @@ namespace ApplicationCore.Services
             }
         }
 
+        /// <summary>
+        /// Get specific image
+        /// </summary>
+        /// <param name="imageId">image id</param>
+        /// <returns>Image instance</returns>
         public virtual async Task<Image> GetImageByIdAsync(int imageId)
         {
-            var imageSpecification = new ImageSpecification((long) imageId);
-            var imageInstance = await imageRepo.GetSingleInstanceAsync(imageSpecification);
-            if(imageInstance == null)
+            var imageInstance = await imageRepo.GetImageDetails((long) imageId);
+            if (imageInstance == null)
             {
                 throw new InvalidRequest();
             }
             return imageInstance;
+        }
+
+        /// <summary>
+        /// Like or dislike image
+        /// </summary>
+        /// <param name="imageid">image id</param>
+        /// <param name="like">true for like, false for dislike</param>
+        /// <param name="userId">user id</param>
+        /// <returns>number of likes and number of dislieks</returns>
+        public virtual async Task<(int likes, int dislikes)> LikeImageAsync(long imageid, bool like, string userId)
+        {
+            var imageInstance = await GetImageByIdAsync((int) imageid);
+
+            imageInstance.Likes.Add(new Like
+            {
+                Created = DateTime.Now,
+                Liked = like,
+                UserId = userId,
+            });
+
+            await imageRepo.UpdateAsync(imageInstance);
+
+            var likes = imageInstance.Likes.Count(item => item.Liked);
+            var dislikes = imageInstance.Likes.Count(item => !item.Liked);
+            return (likes, dislikes);
         }
     }
 }

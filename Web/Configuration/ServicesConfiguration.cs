@@ -32,6 +32,7 @@ namespace Web.Configuration
             //Infrastracture project
             services.AddScoped(typeof(ISpecificationEvaluator<>), typeof(EfSpecificationEvaluator<>));
             services.AddScoped(typeof(IAsyncRepository<>), typeof(EfRepository<>));
+            services.AddScoped<IImageRepository, ImageRepository>();
             services.AddTransient<IEmailSender, SendGridEmailSender>();
 
             if (configuration.UsingIdentity())

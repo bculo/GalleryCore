@@ -1,6 +1,8 @@
-﻿using ApplicationCore.Extensions;
+﻿using ApplicationCore.Entities;
+using ApplicationCore.Extensions;
 using ApplicationCore.Interfaces;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -104,8 +106,8 @@ namespace Web.Controllers
 
         [HttpPost]
         [ValidateModel]
-        [ValidateAntiForgeryToken]
         [Route("EditAjax")]
+        [ValidateAntiForgeryToken]
         public virtual async Task<IActionResult> EditAjax(EditCategoryModel model)
         {
             var serviceResult = await service.UpdateCategoryAsync(model.Id, model.Name, model.CategoryImage?.FileName);
