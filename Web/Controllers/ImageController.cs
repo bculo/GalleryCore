@@ -19,6 +19,7 @@ using Web.Models.Image;
 
 namespace Web.Controllers
 {
+    [Authorize]
     [ErrorFilter]
     [Route("Image")]
     public class ImageController : Controller, IControllerInformation
@@ -45,21 +46,12 @@ namespace Web.Controllers
         #region Display section
 
         [HttpGet]
-        [Route("")]
-        [Route("Index")]
-        public virtual async Task<IActionResult> Index(int? page, string searchQuery)
-        {
-            var paginationResult = await service.GetImagesAsync(page, settings.ImagePageSize, searchQuery);
-            var imageDisplayModel = PrepareModel(paginationResult, searchQuery);
-            return View(imageDisplayModel);
-        }
-
-        [HttpGet]
         [Route("Index/{categoryId}")]
         public virtual async Task<IActionResult> Index([FromRoute] int categoryId, int? page, string searchQuery)
         {
             var paginationResult = await service.GetImagesByCategoryAsync(categoryId, page, settings.ImagePageSize, searchQuery);
             var imageDisplayModel = PrepareModel(paginationResult, searchQuery);
+            imageDisplayModel.CategoryId = categoryId;
             return View(imageDisplayModel);
         }
 
@@ -97,9 +89,8 @@ namespace Web.Controllers
         {
             string fileName = model.Image.FileName;
             List<string> tags = SeperateTags(model.Tags);
-            //string userId = User.GetUserId();
-            string userId = "114068491279450791564"; //hardcoded user id 
-
+            string userId = User.GetUserId();
+           
             var serviceResult = await service.SaveNewImageAsync(model.CategoryId, model.Description, fileName, userId, tags);
             if (serviceResult.Success)
             {
@@ -153,7 +144,7 @@ namespace Web.Controllers
 
         #endregion
 
-        #region Selected image action
+        #region Display selected image section
 
         [HttpGet]
         [Route("Detail/{imageId}")]
@@ -165,38 +156,47 @@ namespace Web.Controllers
             return View(viewModel);
         }
 
+        #endregion
+
+        #region Image actions section
+
         [HttpPost]
         [ValidateModel]
         [Route("LikeAjax")]
         [ValidateAntiForgeryToken]
         public virtual async Task<IActionResult> LikeAjax(ImageLike model)
         {
-            //string userId = User.GetUserId();
-            string userId = "114068491279450791564"; //hardcoded user id 
+            //TODO
+            //Remove default value for Liked attribute and create new migration
+            string userId = User.GetUserId();
             var (likes, dislikes) = await service.LikeImageAsync(model.Id, model.Like, userId);
             return Json(new { success = true, like = likes, dislike = dislikes });
         }
 
-        [HttpPost]
-        [ValidateModel]
-        [Route("CommentAjax")]
-        [ValidateAntiForgeryToken]
-        public virtual async Task<IActionResult> CommentAjax(ImageComment model)
+        [HttpGet]
+        [Route("Comment/{imageId}")]
+        public virtual async Task<IActionResult> Comment([FromRoute] long imageId, int page)
         {
-
-
-            return Json(new { success = true });
+            var serviceResult = await service.GetImageCommentsAsync(imageId, page, settings.CommentsPageSize);
+            var viewModel = mapper.Map<CommentViewModel>(serviceResult);
+            viewModel.ImageId = imageId;
+            return View(viewModel);
         }
 
         [HttpPost]
-        [Route("DisplayComment")]
+        [ValidateModel]
         [ValidateAntiForgeryToken]
-        public virtual async Task<IActionResult> DisplayComment(int page)
+        [Route("Comment/{imageId}")]
+        public virtual async Task<IActionResult> Comment(CreateComment model)
         {
-            int take = settings.CommentsPageSize;
+            string userId = User.GetUserId();
+            await service.CreateCommmentAsync(model.ImageId, model.Description, userId);
 
-
-            return Json(new { success = true });
+            //Get last page to show new comment
+            var serviceResult = await service.GetImageCommentsAsync(model.ImageId, 20000000, settings.CommentsPageSize);
+            var viewModel = mapper.Map<CommentViewModel>(serviceResult);
+            viewModel.ImageId = model.ImageId;
+            return View(viewModel);
         }
 
         #endregion

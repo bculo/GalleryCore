@@ -39,5 +39,13 @@ namespace Infrastructure.Data.EntityFramework.Repository
 
             return result;
         }
+
+        public virtual async Task<Image> GetImageWithComments(long imageId)
+        {
+            return await dbContext.Images
+                .Where(item => item.Id == imageId)
+                .Include(item => item.Comments)
+                .FirstOrDefaultAsync();
+        }
     }
 }

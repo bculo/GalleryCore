@@ -15,6 +15,7 @@ namespace ApplicationCore.Services
     public class ImageService : IImageService
     {
         protected readonly IAsyncRepository<Category> categoryRepo;
+        protected readonly IAsyncRepository<Comment> commentRepo;
         protected readonly IImageRepository imageRepo;
         protected readonly IImageNameGenerator generator;
         protected readonly IPaginationMaker pgMaker;
@@ -23,12 +24,14 @@ namespace ApplicationCore.Services
             IAsyncRepository<Category> categoryRepo,
             IImageRepository imageRepo,
             IImageNameGenerator generator,
-            IPaginationMaker maker)
+            IPaginationMaker maker,
+            IAsyncRepository<Comment> commentRepo)
         {
             this.categoryRepo = categoryRepo;
             this.imageRepo = imageRepo;
             this.generator = generator;
             this.pgMaker = maker;
+            this.commentRepo = commentRepo;
         }
 
         /// <summary>
@@ -183,6 +186,63 @@ namespace ApplicationCore.Services
             var likes = imageInstance.Likes.Count(item => item.Liked);
             var dislikes = imageInstance.Likes.Count(item => !item.Liked);
             return (likes, dislikes);
+        }
+
+        /// <summary>
+        /// Comment pagination for choosen image 
+        /// </summary>
+        /// <param name="imageId"></param>
+        /// <param name="page"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
+        public virtual async Task<IPaginationModel<Comment>> GetImageCommentsAsync(long imageId, int? page, int pageSize)
+        {
+            if(await imageRepo.GetByIdAsync(imageId) == null)
+            {
+                throw new InvalidRequest("Iamge doesnt exist");
+            }
+
+            var countSpec = new CommentSpecification(imageId);
+            int numberOfInstances = await commentRepo.CountAsync(countSpec);
+            int currentPage = pgMaker.CheckPageLimits(page, numberOfInstances, pageSize);
+            int skip = pgMaker.Skip(currentPage, pageSize);
+
+            var paginationSpec = new CommentSpecification(imageId, skip, pageSize);
+            var commentInstances = await commentRepo.ListAsync(paginationSpec);
+
+            var options = new PaginationOptions(currentPage, numberOfInstances, pageSize);
+            return pgMaker.PreparePaginationModel<Comment>(commentInstances, options);
+        }
+
+        /// <summary>
+        /// Add iamge comment
+        /// </summary>
+        /// <param name="imageId"></param>
+        /// <param name="description"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public virtual async Task CreateCommmentAsync(long imageId, string description, string userId)
+        {
+            if (string.IsNullOrEmpty(description))
+            {
+                throw new ArgumentNullException(nameof(description));
+            }
+
+            var imageInstance = await imageRepo.GetImageWithComments(imageId);
+            if(imageInstance == null)
+            {
+                throw new InvalidRequest("Iamge doesnt exist");
+            }
+
+            imageInstance.Comments.Add(new Comment
+            {
+                Created = DateTime.Now,
+                Show = true,
+                UserId = userId,
+                Description = description,
+            });
+
+            await imageRepo.UpdateAsync(imageInstance);
         }
     }
 }

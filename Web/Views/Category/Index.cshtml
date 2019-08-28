@@ -8,9 +8,12 @@
 
     <div class="heading-container">
         <h1 class="top-page-heading">Categories</h1>
+        @if (User.IsInRole("Moderator") || User.IsInRole("Administrator"))
+        {
         <a asp-action="Create">
             <img src="~/images/add.png" alt="Option"/>
         </a>
+        }
     </div>
 
     <div class="pagination-information">
@@ -37,18 +40,23 @@
 
 <div class="image-container">
 
+    @{ bool userAdmin = User.IsInRole("Administrator") || User.IsInRole("Moderator"); }
+
     @foreach (var item in @Model.Categories)
     {
         <div class="category-container-item"> 
             
-            <div class="category-options-place">
-                <a asp-action="Edit" asp-route-categoryId="@item.Id">
-                    <img src="~/images/edit.png" class="category-option-item" alt="Option" />
-                </a>
-                <a asp-action="Delete" asp-route-categoryId="@item.Id">
-                    <img src="~/images/delete.png" alt="Option" class="category-option-item" />
-                </a>
-            </div>
+            @if (userAdmin)
+            {
+                <div class="category-options-place">
+                    <a asp-action="Edit" asp-route-categoryId="@item.Id">
+                        <img src="~/images/edit.png" class="category-option-item" alt="Option" />
+                    </a>
+                    <a asp-action="Delete" asp-route-categoryId="@item.Id">
+                        <img src="~/images/delete.png" alt="Option" class="category-option-item" />
+                    </a>
+                </div>
+            }
 
             <a asp-controller="Image" asp-action="Index" asp-route-categoryId="@item.Id">
                 <img src="@item.Url" alt="Image" />

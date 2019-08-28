@@ -40,6 +40,9 @@ namespace Web.Controllers
         #region Display section
 
         [HttpGet]
+        [Authorize]
+        [Route("")]
+        [Route("Index")]
         public virtual async Task<IActionResult> Index(int? page, string searchQuery)
         {
             //Get pagination result
@@ -60,6 +63,7 @@ namespace Web.Controllers
 
         [HttpGet]
         [Route("Edit/{categoryId}")]
+        [Authorize(Roles = "Moderator, Administrator")]
         public virtual async Task<IActionResult> Edit([FromRoute] int categoryId)
         {
             //Get category
@@ -77,6 +81,7 @@ namespace Web.Controllers
         [ValidateModel]
         [ValidateAntiForgeryToken]
         [Route("Edit/{categoryId}")]
+        [Authorize(Roles = "Moderator, Administrator")]
         public virtual async Task<IActionResult> Edit(EditCategoryModel model)
         {
             var serviceResult = await service.UpdateCategoryAsync(model.Id, model.Name, model.CategoryImage?.FileName);
@@ -108,6 +113,7 @@ namespace Web.Controllers
         [ValidateModel]
         [Route("EditAjax")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Moderator, Administrator")]
         public virtual async Task<IActionResult> EditAjax(EditCategoryModel model)
         {
             var serviceResult = await service.UpdateCategoryAsync(model.Id, model.Name, model.CategoryImage?.FileName);
@@ -132,6 +138,7 @@ namespace Web.Controllers
 
         [HttpGet]
         [Route("Delete/{categoryId}")]
+        [Authorize(Roles = "Moderator, Administrator")]
         public virtual async Task<IActionResult> Delete([FromRoute] int categoryId)
         {
             //Get category
@@ -148,6 +155,7 @@ namespace Web.Controllers
         [ValidateModel]
         [ValidateAntiForgeryToken]
         [Route("Delete/{categoryId}")]
+        [Authorize(Roles = "Moderator, Administrator")]
         public virtual async Task<IActionResult> Delete(DeleteCategoryModel model)
         {
             var serviceResult = await service.DeleteCategoryAsync(model.Id.Value);
@@ -189,6 +197,7 @@ namespace Web.Controllers
 
         [HttpGet]
         [Route("Create")]
+        [Authorize(Roles = "Moderator, Administrator")]
         public virtual IActionResult Create() => View();
 
         /// <summary>
@@ -200,6 +209,7 @@ namespace Web.Controllers
         [ValidateModel]
         [Route("Create")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Moderator, Administrator")]
         public virtual async Task<IActionResult> Create(CreateCategoryModel model)
         {
             //Create new category
@@ -227,6 +237,7 @@ namespace Web.Controllers
         [ValidateModel]
         [Route("CreateAjax")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Moderator, Administrator")]
         public virtual async Task<IActionResult> CreateAjax([FromForm] CreateCategoryModel model)
         {
             //Create new category

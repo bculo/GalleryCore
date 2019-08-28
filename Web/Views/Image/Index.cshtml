@@ -2,16 +2,12 @@
 
 <div class="top-page-container">
 
-    <h1 class="top-page-heading">Images</h1>
-
-    @{
-        if (User.IsInRole("Moderator") || User.IsInRole("Admin"))
-        {
-            <div class="moderator-admin-options">
-                <a asp-action="Create">Create categroy</a>
-            </div>
-        }
-    }
+    <div class="heading-container">
+        <h1 class="top-page-heading">Images</h1>
+        <a asp-action="Create" asp-route-categoryId="@Model.CategoryId">
+            <img src="~/images/add.png" alt="Option" />
+        </a>
+    </div>
 
     <div class="pagination-information">
         <p>Current page: @Model.Pagination.CurrentPage</p>

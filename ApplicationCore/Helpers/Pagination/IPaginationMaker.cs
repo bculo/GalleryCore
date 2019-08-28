@@ -13,7 +13,7 @@ namespace ApplicationCore.Helpers.Pagination
             PaginationOptions options)
             where DataType : class;
 
-        int CheckPageLimits(int currentPage, int numberOfInstances, int pageSize, int lowestLimit = 1);
+        int CheckPageLimits(int? currentPage, int numberOfInstances, int pageSize, int lowestLimit = 1);
 
         int Skip(int currentPage, int pageSize);
     }

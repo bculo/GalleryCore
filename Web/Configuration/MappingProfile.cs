@@ -56,7 +56,18 @@ namespace Web.Configuration
                 .ForMember(dest => dest.Dislikes, opt => opt.MapFrom(src => (src.Likes.Count(item => !item.Liked))))
                 .ForMember(dest => dest.Comments, opt => opt.MapFrom(src => src.Comments));
 
-
+            //Comment mapper section
+            CreateMap<IPaginationModel<Comment>, CommentViewModel>()
+                .ForMember(dest => dest.Comments, opt => opt.MapFrom(src => src.Data))
+                .ForMember(dest => dest.Pagination, opt => opt.MapFrom(src => new PaginationsProperties
+                {
+                    CurrentPage = src.CurrentPage,
+                    Pages = src.Pages,
+                    TotalItems = src.TotalItems,
+                    TotalPages = src.TotalPages
+                }));
+            CreateMap<Comment, ImageComment>()
+                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.UserName));
         }
     }
 }

@@ -54,21 +54,24 @@
     </div>
 </div>
 
-<hr />
 <div class="comment-section">
+
+    <h5>Comment section</h5>
+    <hr />
     @foreach (var item in Model.Comments)
     {
-        <span class="font-weight-bold">@item.UserName</span>
-        <p>@item.Description</p>
+        <div>
+            <span class="font-weight-bold">@item.UserName</span>
+            <p>@item.Description</p>
+            <hr />
+        </div>
     }
     @if (Model.Comments.Count == 0)
     {
         <p>0 comments</p>
     }
-    else
-    {
-        <input asp-action="Comments" type="button" id="loadComments" value="More comments" />
-    }
+
+    <a asp-action="Comment" asp-route-imageId="@Model.Id">Show all comments</a>
 </div>
 
 <div>

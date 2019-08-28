@@ -1,12 +1,17 @@
 ﻿
-<li class="nav-item">
-    <a class="nav-link text-dark" asp-controller="Category" asp-action="Index">Gallery</a>
-</li>
-
 @if (User.Identity.IsAuthenticated)
 {
     <li class="nav-item">
+        <a class="nav-link text-dark" asp-controller="Category" asp-action="Index">Gallery</a>
+    </li>
+    <li class="nav-item">
         <a class="nav-link text-dark" asp-controller="Authentication" asp-action="Logout">Logout</a>
+    </li>
+}
+else
+{
+    <li class="nav-item">
+        <a class="nav-link text-dark" asp-controller="Authentication" asp-action="Login">Login</a>
     </li>
 }
 

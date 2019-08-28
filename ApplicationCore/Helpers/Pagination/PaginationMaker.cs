@@ -6,20 +6,22 @@ namespace ApplicationCore.Helpers.Pagination
 {
     public class PaginationMaker : IPaginationMaker
     {
-        public int CheckPageLimits(int currentPage, int numberOfInstances, int pageSize, int lowestLimit = 1)
+        public int CheckPageLimits(int? currentPage, int numberOfInstances, int pageSize, int lowestLimit = 1)
         {
+            int page = currentPage ?? 1;
+
             int maxPage = (int)Math.Ceiling(numberOfInstances / (decimal)pageSize);
 
-            if (maxPage < currentPage)
+            if (maxPage < page)
             {
-                currentPage = (maxPage == 0) ? 1 : maxPage;
+                page = (maxPage == 0) ? 1 : maxPage;
             }
-            else if (currentPage < lowestLimit)
+            else if (page < lowestLimit)
             {
-                currentPage = lowestLimit;
+                page = lowestLimit;
             }
 
-            return currentPage;
+            return page;
         }
 
         public PaginationModel<DataType> PreparePaginationModel<DataType>(

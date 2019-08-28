@@ -13,13 +13,6 @@ namespace Web.Controllers
             return View();
         }
 
-        [Authorize]
-        public IActionResult Privacy()
-        {
-            string identity = HttpContext.User.GetUserId();
-            return View();
-        }
-
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

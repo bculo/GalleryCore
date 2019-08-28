@@ -1,0 +1,67 @@
+﻿@model Web.Models.Image.CommentViewModel
+
+<div class="top-page-container">
+
+    <h4>Comments</h4>
+    <hr />
+
+    @{
+        if (User.IsInRole("Moderator") || User.IsInRole("Admin"))
+        {
+            <div class="moderator-admin-options">
+                <a asp-action="Create">Create categroy</a>
+            </div>
+        }
+    }
+
+    <div class="pagination-information">
+        <p>Current page: @Model.Pagination.CurrentPage</p>
+        <p>Total records: @Model.Pagination.TotalItems</p>
+        <p>Total pages: @Model.Pagination.TotalPages</p>
+    </div>
+
+    <form method="get" asp-action="Comment" asp-route-imageId="@Model.ImageId">
+        <div class="pagination-pages-list">
+            @foreach (var item in Model.Pagination.Pages)
+            {
+                <input name="page" type="submit" value="@item" />
+            }
+        </div>
+    </form>
+</div>
+
+<div>
+    <form asp-action="Comment" method="post">
+        <div class="form-group">
+            <input name="ImageId" value="@Model.ImageId" hidden />
+        </div>
+        <div class="form-group">
+            <label for="Description">Description</label>
+            <input name="Description" type="text" class="form-control" />
+        </div>
+        <div class="form-group">
+            <input type="submit" value="Comment" id="submit" class="btn btn-primary" />
+        </div>
+    </form>
+
+    <hr />
+
+    <div class="show-comments">
+        @foreach (var item in Model.Comments)
+        {
+            <div class="single-comment">
+                <span class="font-weight-bold">@item.UserName</span>
+                <p>@item.Description</p>
+                <p>@item.Created</p>
+            </div>
+
+            <hr />
+        }
+    </div>
+
+</div>
+
+<div>
+    <a asp-action="Detail" asp-route-imageId="@Model.ImageId">Back to image</a>
+</div>
+
