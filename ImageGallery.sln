@@ -3,11 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.705
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web", "Web\Web.csproj", "{4AB849D7-328E-42AD-AF05-8C6E0C63241F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Web", "Web\Web.csproj", "{4AB849D7-328E-42AD-AF05-8C6E0C63241F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApplicationCore", "ApplicationCore\ApplicationCore.csproj", "{E0297FC3-4051-42C2-B8B5-64D7D24F68E0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApplicationCore", "ApplicationCore\ApplicationCore.csproj", "{E0297FC3-4051-42C2-B8B5-64D7D24F68E0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{1A551A70-389B-4142-81B0-7B73751ABD45}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{1A551A70-389B-4142-81B0-7B73751ABD45}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Api", "Api\Api.csproj", "{A34672AB-D600-4FC9-B44B-9061CF1832CB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{1A551A70-389B-4142-81B0-7B73751ABD45}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1A551A70-389B-4142-81B0-7B73751ABD45}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1A551A70-389B-4142-81B0-7B73751ABD45}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A34672AB-D600-4FC9-B44B-9061CF1832CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A34672AB-D600-4FC9-B44B-9061CF1832CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A34672AB-D600-4FC9-B44B-9061CF1832CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A34672AB-D600-4FC9-B44B-9061CF1832CB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
